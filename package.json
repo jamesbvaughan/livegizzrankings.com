@@ -60,7 +60,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^24.10.1",
     "@types/pluralize": "^0.0.33",
-    "@types/react": "19.2.5",
+    "@types/react": "19.2.6",
     "@types/react-dom": "19.2.3",
     "drizzle-kit": "^0.31.7",
     "husky": "^9.1.7",
