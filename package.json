@@ -44,7 +44,7 @@
     "date-fns": "^4.1.0",
     "diff": "^8.0.2",
     "drizzle-orm": "^0.44.7",
-    "next": "16.0.3",
+    "next": "16.0.7",
     "pluralize": "^8.0.0",
     "react": "19.2.0",
     "react-chartjs-2": "^5.3.1",
