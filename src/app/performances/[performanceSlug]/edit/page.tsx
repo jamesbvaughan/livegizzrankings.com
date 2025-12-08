@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { editPerformance } from "@/actions/editPerformance";
+import { markAsDebut } from "@/actions/markAsDebut";
 import { ensureSignedIn } from "@/auth/utils";
+import { MarkAsDebutButton } from "@/components/MarkAsDebutButton";
 import PerformanceForm from "@/components/PerformanceForm";
 import { PageContent, PageTitle } from "@/components/ui";
 import { getPerformanceBySlug, getShowById, getSongById } from "@/dbUtils";
@@ -59,6 +61,7 @@ export default async function EditPerformancePage({
   ]);
 
   const performanceTitle = getPerformanceTitle(song, show);
+  const isDebut = song.debutPerformanceId === performance.id;
 
   return (
     <>
@@ -72,6 +75,19 @@ export default async function EditPerformancePage({
           performance={performance}
           submitLabel="Update Performance"
         />
+
+        {!isDebut && (
+          <div className="mt-8 border-muted-2 border-t pt-8">
+            <h2 className="mb-4 text-xl">Mark as Debut Performance</h2>
+            <p className="text-muted mb-4">
+              Mark this as the first time {song.title} was played live.
+            </p>
+            <MarkAsDebutButton
+              performanceId={performance.id}
+              markAsDebut={markAsDebut}
+            />
+          </div>
+        )}
       </PageContent>
     </>
   );

@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   date,
   integer,
@@ -55,6 +56,9 @@ export const songs = pgTable("songs", {
     .notNull(),
   albumPosition: integer("album_position").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  debutPerformanceId: uuid("debut_performance_id").references(
+    (): AnyPgColumn => performances.id,
+  ),
 });
 
 export type Song = typeof songs.$inferSelect;

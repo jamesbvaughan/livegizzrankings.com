@@ -39,9 +39,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 async function PerformanceRow({
   performance,
   index,
+  isDebut,
 }: {
   performance: Performance;
   index: number;
+  isDebut: boolean;
 }) {
   const show = await getShowById(performance.showId);
   const showTitle = getShowTitle(show);
@@ -64,12 +66,19 @@ async function PerformanceRow({
         </div>
 
         <div>
-          <Link
-            href={performancePath}
-            className="text-2xl no-underline sm:text-4xl"
-          >
-            {showTitle}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={performancePath}
+              className="text-2xl no-underline sm:text-4xl"
+            >
+              {showTitle}
+            </Link>
+            {isDebut && (
+              <span className="bg-red text-background rounded px-2 py-1 text-xs font-bold">
+                DEBUT
+              </span>
+            )}
+          </div>
 
           <EloScore score={performance.eloRating} />
         </div>
@@ -78,7 +87,13 @@ async function PerformanceRow({
   );
 }
 
-async function RankedPerformances({ songId }: { songId: string }) {
+async function RankedPerformances({
+  songId,
+  debutPerformanceId,
+}: {
+  songId: string;
+  debutPerformanceId: string | null;
+}) {
   const songPerformances = await db.query.performances.findMany({
     where: eq(performances.songId, songId),
     orderBy: desc(performances.eloRating),
@@ -91,6 +106,7 @@ async function RankedPerformances({ songId }: { songId: string }) {
           <PerformanceRow
             performance={performance}
             index={index}
+            isDebut={performance.id === debutPerformanceId}
             key={performance.id}
           />
         );
@@ -151,7 +167,10 @@ export default async function Song({ params }: Props) {
           )
         ) : (
           <Suspense fallback="Loading performances...">
-            <RankedPerformances songId={song.id} />
+            <RankedPerformances
+              songId={song.id}
+              debutPerformanceId={song.debutPerformanceId}
+            />
           </Suspense>
         )}
 
