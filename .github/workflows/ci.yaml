@@ -22,7 +22,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - run: bun run lint
-      - run: bun run prettier --check .
 
   knip:
     name: Check for unused code
