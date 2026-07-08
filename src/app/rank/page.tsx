@@ -6,9 +6,10 @@ import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { getPerformanceById, getSongBySlug } from "@/dbUtils";
 import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";
 
+import { auth } from "@clerk/nextjs/server";
+
 import { getRandomPairForCurrentUser } from "./getRandomPair";
 import { PerformanceFormButtons } from "./PerformanceVoteFormButton";
-import { ensureSignedIn } from "@/auth/utils";
 
 export const metadata: Metadata = {
   title: "Rank Songs",
@@ -23,7 +24,7 @@ interface Props {
 }
 
 export default async function Rank({ searchParams }: Props) {
-  await ensureSignedIn();
+  await auth.protect();
 
   const { song: songSlug } = await searchParams;
   const filterSong = songSlug ? await getSongBySlug(songSlug) : null;
