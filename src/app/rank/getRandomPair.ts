@@ -92,17 +92,17 @@ export async function getRandomPairForCurrentUser(filterSongId?: string) {
     // Both performances in a pair are from the same song
     const songId = performanceToSongMap.get(pair.performance1Id);
     if (songId) {
-      songVoteCounts.set(songId, (songVoteCounts.get(songId) || 0) + 1);
+      songVoteCounts.set(songId, (songVoteCounts.get(songId) ?? 0) + 1);
     }
 
     // Increment performance vote counts
     performanceVoteCounts.set(
       pair.performance1Id,
-      (performanceVoteCounts.get(pair.performance1Id) || 0) + 1,
+      (performanceVoteCounts.get(pair.performance1Id) ?? 0) + 1,
     );
     performanceVoteCounts.set(
       pair.performance2Id,
-      (performanceVoteCounts.get(pair.performance2Id) || 0) + 1,
+      (performanceVoteCounts.get(pair.performance2Id) ?? 0) + 1,
     );
   }
 
@@ -149,7 +149,7 @@ export async function getRandomPairForCurrentUser(filterSongId?: string) {
   let songWithMinVotes: string | null = null;
 
   for (const songId of songIds) {
-    const voteCount = songVoteCounts.get(songId) || 0;
+    const voteCount = songVoteCounts.get(songId) ?? 0;
     if (voteCount < minVoteCount) {
       minVoteCount = voteCount;
       songWithMinVotes = songId;
@@ -174,12 +174,12 @@ export async function getRandomPairForCurrentUser(filterSongId?: string) {
   // Secondary: by lexicographic order of concatenated IDs
   const sortedPairs = pairsForSong.toSorted((a, b) => {
     const aMinVotes = Math.min(
-      performanceVoteCounts.get(a[0]) || 0,
-      performanceVoteCounts.get(a[1]) || 0,
+      performanceVoteCounts.get(a[0]) ?? 0,
+      performanceVoteCounts.get(a[1]) ?? 0,
     );
     const bMinVotes = Math.min(
-      performanceVoteCounts.get(b[0]) || 0,
-      performanceVoteCounts.get(b[1]) || 0,
+      performanceVoteCounts.get(b[0]) ?? 0,
+      performanceVoteCounts.get(b[1]) ?? 0,
     );
 
     if (aMinVotes !== bMinVotes) {

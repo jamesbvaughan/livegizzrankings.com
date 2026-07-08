@@ -34,7 +34,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
     switch (entityType) {
       case "album": {
         const album = await db.query.albums.findFirst({
-          where: (albums, { eq }) => eq(albums.id, entityId),
+          where: (albums) => eq(albums.id, entityId),
         });
         if (album) {
           return {
@@ -46,7 +46,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
       }
       case "song": {
         const song = await db.query.songs.findFirst({
-          where: (songs, { eq }) => eq(songs.id, entityId),
+          where: (songs) => eq(songs.id, entityId),
           with: { album: true },
         });
         if (song) {
@@ -59,7 +59,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
       }
       case "show": {
         const show = await db.query.shows.findFirst({
-          where: (shows, { eq }) => eq(shows.id, entityId),
+          where: (shows) => eq(shows.id, entityId),
         });
         if (show) {
           return {
@@ -71,7 +71,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
       }
       case "performance": {
         const performance = await db.query.performances.findFirst({
-          where: (performances, { eq }) => eq(performances.id, entityId),
+          where: (performances) => eq(performances.id, entityId),
           with: {
             song: { with: { album: true } },
             show: true,

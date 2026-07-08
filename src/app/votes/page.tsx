@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
 import type { Show, Song, Vote } from "@/drizzle/schema";
-import { votes } from "@/drizzle/schema";
+import { votes as votesTable } from "@/drizzle/schema";
 import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";
 
 import { Converge } from "./Converge";
@@ -194,7 +194,7 @@ async function VotesList({ votes }: { votes: Vote[] }) {
 
 export default async function Votes() {
   const allVotes = await db.query.votes.findMany({
-    orderBy: desc(votes.createdAt),
+    orderBy: desc(votesTable.createdAt),
   });
 
   return (

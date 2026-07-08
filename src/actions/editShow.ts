@@ -83,8 +83,8 @@ export async function editShow(
         slug,
         location,
         date,
-        bandcampAlbumId: bandcampAlbumId || null,
-        youtubeVideoId: youtubeVideoId || null,
+        bandcampAlbumId: bandcampAlbumId ?? null,
+        youtubeVideoId: youtubeVideoId ?? null,
         imageUrl,
       })
       .where(eq(shows.id, showId))
@@ -122,5 +122,5 @@ export async function editShow(
   revalidatePath("/shows");
   revalidatePath(showPath);
 
-  redirect(showPath);
+  return redirect(showPath);
 }

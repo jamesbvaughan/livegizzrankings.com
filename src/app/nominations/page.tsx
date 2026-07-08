@@ -15,7 +15,10 @@ import type {
   Show,
   Song,
 } from "@/drizzle/schema";
-import { nominations, performances } from "@/drizzle/schema";
+import {
+  nominations as nominationsTable,
+  performances,
+} from "@/drizzle/schema";
 import { parseNomination } from "@/lib/nominationParser";
 import { getPerformanceTitle } from "@/utils";
 import { LinkPerformanceButton } from "./LinkPerformanceButton";
@@ -166,7 +169,7 @@ function NominationList({
 export default async function NominationsPage() {
   const [allNominations, adminStatus, songs, shows] = await Promise.all([
     db.query.nominations.findMany({
-      orderBy: desc(nominations.createdAt),
+      orderBy: desc(nominationsTable.createdAt),
     }),
     isAdmin(),
     db.query.songs.findMany({

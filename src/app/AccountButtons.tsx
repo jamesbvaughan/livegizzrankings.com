@@ -50,7 +50,7 @@ export function AccountButtons({
 
   return (
     <div className="flex flex-col items-end space-y-2">
-      <div className="">{username || "signed in"}</div>
+      <div className="">{username ?? "signed in"}</div>
 
       <hr className="border-muted-2 w-full" />
 

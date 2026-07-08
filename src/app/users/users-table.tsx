@@ -84,6 +84,7 @@ export default function UsersTable({ data }: { data: UserData[] }) {
                 // eslint-disable-next-line click-events-have-key-events
                 <th
                   key={header.id}
+                  aria-label={`Sort by ${String(header.column.columnDef.header)}`}
                   className="cursor-pointer select-none p-4 hover:bg-muted-3"
                   onClick={header.column.getToggleSortingHandler()}
                 >

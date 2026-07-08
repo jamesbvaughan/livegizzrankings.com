@@ -67,7 +67,11 @@ interface ShowVideoListProps {
   defaultVideos?: Video[];
 }
 
-export function ShowVideoList({ defaultVideos = [] }: ShowVideoListProps) {
+const noVideos: Video[] = [];
+
+export function ShowVideoList({
+  defaultVideos = noVideos,
+}: ShowVideoListProps) {
   const [videos, setVideos] = useState<Video[]>(
     defaultVideos.length > 0 ? defaultVideos : [],
   );

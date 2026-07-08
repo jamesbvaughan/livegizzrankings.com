@@ -40,8 +40,7 @@ export async function ensureAdmin(): Promise<string> {
     unauthorized();
   }
 
-  const isAdmin = !!sessionClaims?.meta?.isAdmin;
-  if (!isAdmin) {
+  if (!sessionClaims?.meta?.isAdmin) {
     forbidden();
   }
 

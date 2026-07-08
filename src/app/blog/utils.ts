@@ -13,7 +13,7 @@ interface Metadata {
 }
 
 function parseFrontmatter(fileContent: string) {
-  const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
+  const frontmatterRegex = /---\s*([\s\S]*?)\s*---/u;
   const match = frontmatterRegex.exec(fileContent);
   const frontMatterBlock = match![1];
   const content = fileContent.replace(frontmatterRegex, "").trim();
@@ -23,7 +23,8 @@ function parseFrontmatter(fileContent: string) {
   frontMatterLines.forEach((line) => {
     const [key, ...valueArr] = line.split(": ");
     let value = valueArr.join(": ").trim();
-    value = value.replace(/^['"](.*)['"]$/, "$1"); // Remove quotes
+    // Remove quotes
+    value = value.replace(/^['"](.*)['"]$/u, "$1");
     metadata[key.trim() as keyof Metadata] = value;
   });
 

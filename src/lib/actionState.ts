@@ -18,8 +18,10 @@ export function getFormNumberValue(
   name: string,
 ): number | undefined {
   const value = formData?.get(name);
-  if (typeof value === "string") {
-    const num = parseInt(value, 10);
+  // Note that the empty-string check matters here: `Number("")` is `0`, but an
+  // empty form field should be treated as undefined.
+  if (typeof value === "string" && value.trim() !== "") {
+    const num = Math.trunc(Number(value));
     return isNaN(num) ? undefined : num;
   }
   return undefined;

@@ -70,8 +70,8 @@ export async function addShow(
         slug,
         location,
         date,
-        bandcampAlbumId: bandcampAlbumId || null,
-        youtubeVideoId: youtubeVideoId || null,
+        bandcampAlbumId: bandcampAlbumId ?? null,
+        youtubeVideoId: youtubeVideoId ?? null,
         imageUrl,
       })
       .returning();
@@ -104,5 +104,5 @@ export async function addShow(
   revalidatePath("/shows");
 
   const showPath = getShowPath(newShow);
-  redirect(showPath);
+  return redirect(showPath);
 }

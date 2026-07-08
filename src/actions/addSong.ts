@@ -67,5 +67,5 @@ export async function addSong(
   revalidatePath(`/albums/${albumId}`);
 
   const songPath = getSongPath(newSong);
-  redirect(songPath);
+  return redirect(songPath);
 }

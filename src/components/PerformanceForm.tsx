@@ -49,15 +49,15 @@ export default function PerformanceForm({
   );
 
   const [bandcampTrackId, setBandcampTrackId] = useState(
-    getFormValue(formData, "bandcampTrackId") ||
-      performance?.bandcampTrackId ||
+    getFormValue(formData, "bandcampTrackId") ??
+      performance?.bandcampTrackId ??
       "",
   );
 
   const [youtubeVideoId, setYoutubeVideoId] = useState(
-    getFormValue(formData, "youtubeVideoId") ||
-      performance?.youtubeVideoId ||
-      defaultYoutubeVideoId ||
+    getFormValue(formData, "youtubeVideoId") ??
+      performance?.youtubeVideoId ??
+      defaultYoutubeVideoId ??
       "",
   );
 
@@ -94,7 +94,7 @@ export default function PerformanceForm({
         new Date(a.album.releaseDate).getTime(),
     )
     .map((group) => ({
-      ...group,
+      album: group.album,
       songs: group.songs.toSorted((a, b) => a.albumPosition - b.albumPosition),
     }));
 
@@ -120,8 +120,8 @@ export default function PerformanceForm({
         name="songId"
         required
         defaultValue={
-          getFormValue(formData, "songId") ||
-          performance?.songId ||
+          getFormValue(formData, "songId") ??
+          performance?.songId ??
           defaultSongId
         }
         errorMessage="Please select a song"
@@ -147,8 +147,8 @@ export default function PerformanceForm({
         name="showId"
         required
         defaultValue={
-          getFormValue(formData, "showId") ||
-          performance?.showId ||
+          getFormValue(formData, "showId") ??
+          performance?.showId ??
           defaultShowId
         }
         errorMessage="Please select a show"
@@ -176,7 +176,7 @@ export default function PerformanceForm({
         min={1}
         max={99}
         defaultValue={
-          getFormNumberValue(formData, "showPosition") ||
+          getFormNumberValue(formData, "showPosition") ??
           performance?.showPosition
         }
         placeholder="1"
@@ -244,7 +244,7 @@ export default function PerformanceForm({
         value={youtubeStartTime ?? ""}
         onChange={(e) => {
           const value = e.target.value;
-          setYoutubeStartTime(value ? parseInt(value, 10) : undefined);
+          setYoutubeStartTime(value ? Math.trunc(Number(value)) : undefined);
         }}
         placeholder="0"
         helpText="Start time in seconds for this song in the YouTube video. You can get this from the YouTube URL by pausing the video at the song start, right-clicking on the video, and selecting 'Copy video URL at current time'."

@@ -18,10 +18,12 @@ interface ShowFormProps {
   submitLabel?: string;
 }
 
+const noVideos: ShowVideo[] = [];
+
 export default function ShowForm({
   action,
   show,
-  videos = [],
+  videos = noVideos,
   submitLabel = "Save",
 }: ShowFormProps) {
   const [{ errorMessage, formData }, formAction, pending] = useActionState(
@@ -30,7 +32,7 @@ export default function ShowForm({
   );
 
   const [bandcampAlbumId, setBandcampAlbumId] = useState(
-    getFormValue(formData, "bandcampAlbumId") || show?.bandcampAlbumId || "",
+    getFormValue(formData, "bandcampAlbumId") ?? show?.bandcampAlbumId ?? "",
   );
 
   return (
@@ -48,7 +50,7 @@ export default function ShowForm({
         pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
         minLength={1}
         maxLength={100}
-        defaultValue={getFormValue(formData, "slug") || show?.slug}
+        defaultValue={getFormValue(formData, "slug") ?? show?.slug}
         placeholder="atlanta-2024"
         helpText="URL-friendly identifier (lowercase, hyphens, typically <location>-<year> format)"
         errorMessage="Slug must be lowercase letters, numbers, and hyphens only"
@@ -62,7 +64,7 @@ export default function ShowForm({
         required
         minLength={1}
         maxLength={300}
-        defaultValue={getFormValue(formData, "location") || show?.location}
+        defaultValue={getFormValue(formData, "location") ?? show?.location}
         placeholder="Atlanta"
         helpText="Show location, typically just a country or city or festival name, whatever people commonly use to refer to the show."
         errorMessage="Location is required and must be between 1-300 characters"
@@ -74,7 +76,7 @@ export default function ShowForm({
         name="date"
         type="date"
         required
-        defaultValue={getFormValue(formData, "date") || show?.date}
+        defaultValue={getFormValue(formData, "date") ?? show?.date}
         helpText="If there were multiple nights, use the date of the first one."
         errorMessage="Please select a valid date"
       />
@@ -85,7 +87,7 @@ export default function ShowForm({
         name="imageUrl"
         type="url"
         required
-        defaultValue={getFormValue(formData, "imageUrl") || show?.imageUrl}
+        defaultValue={getFormValue(formData, "imageUrl") ?? show?.imageUrl}
         placeholder="https://example.com/image.jpg"
         helpText="URL for an image of the show's cover art"
         errorMessage="Please provide a valid image URL"

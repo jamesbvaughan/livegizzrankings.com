@@ -21,10 +21,11 @@ export function parseNomination(
 ): ParsedNomination {
   // Extract potential song name (everything before " at ", " in ", " live ", etc.)
   const songPatterns = [
-    /^(.+?)\s+(?:at|in|live|from|during)\s+/i,
-    /^(.+?)\s+-\s+/i,
-    /^(.+?)\s+\(/i,
-    /^(.+?),\s+/i, // Handle comma-separated format like "Song, Location"
+    /^(.+?)\s+(?:at|in|live|from|during)\s+/iu,
+    /^(.+?)\s+-\s+/iu,
+    /^(.+?)\s+\(/iu,
+    // Handle comma-separated format like "Song, Location"
+    /^(.+?),\s+/iu,
   ];
 
   let potentialSongName = "";
@@ -39,7 +40,7 @@ export function parseNomination(
   // If no pattern matched, try first part before common separators
   if (!potentialSongName) {
     const firstPart = message.split(
-      /\s+(?:at|in|live|from|during|-|\()|,\s+/i,
+      /\s+(?:at|in|live|from|during|-|\()|,\s+/iu,
     )[0];
     if (firstPart && firstPart.length > 2) {
       potentialSongName = firstPart.trim();
@@ -48,9 +49,10 @@ export function parseNomination(
 
   // Extract potential location and year
   const locationPatterns = [
-    /(?:at|in|live\s+(?:at|in))\s+(.+?)(?:\s+['']?(\d{2,4}))?\s*$/i,
-    /(?:from|during)\s+(.+?)(?:\s+['']?(\d{2,4}))?\s*$/i,
-    /,\s+(.+?)(?:\s+['']?(\d{2,4}))?\s*$/i, // Handle comma-separated format like "Song, Location"
+    /(?:at|in|live\s+(?:at|in))\s+(.+?)(?:\s+['']?(\d{2,4}))?\s*$/iu,
+    /(?:from|during)\s+(.+?)(?:\s+['']?(\d{2,4}))?\s*$/iu,
+    // Handle comma-separated format like "Song, Location"
+    /,\s+(.+?)(?:\s+['']?(\d{2,4}))?\s*$/iu,
   ];
 
   let potentialLocation = "";
@@ -64,9 +66,9 @@ export function parseNomination(
         const yearStr = match[2];
         if (yearStr.length === 2) {
           // Assume 20xx for 2-digit years
-          potentialYear = 2000 + Number.parseInt(yearStr, 10);
+          potentialYear = 2000 + Math.trunc(Number(yearStr));
         } else {
-          potentialYear = Number.parseInt(yearStr, 10);
+          potentialYear = Math.trunc(Number(yearStr));
         }
       }
       break;
@@ -87,12 +89,14 @@ export function parseNomination(
           song.title.toLowerCase(),
         ),
       }))
-      .filter((match) => match.score > 0.3) // Minimum threshold
+      // Minimum threshold
+      .filter((match) => match.score > 0.3)
       .toSorted((a, b) => b.score - a.score);
 
     if (songMatches.length > 0) {
       bestSong = songMatches[0].song;
-      confidence += songMatches[0].score * 0.6; // Song match contributes 60% to confidence
+      // Song match contributes 60% to confidence
+      confidence += songMatches[0].score * 0.6;
     }
   }
 
@@ -110,15 +114,18 @@ export function parseNomination(
         if (potentialYear) {
           const showYear = new Date(show.date).getFullYear();
           if (showYear === potentialYear) {
-            yearScore = 1.0; // Perfect year match
+            // Perfect year match
+            yearScore = 1.0;
           } else if (Math.abs(showYear - potentialYear) === 1) {
-            yearScore = 0.3; // Off by one year (might be a typo)
+            // Off by one year (might be a typo)
+            yearScore = 0.3;
           }
           // If year doesn't match at all, penalize the location score
           if (yearScore === 0) {
             return {
               show,
-              score: locationScore * 0.3, // Heavily penalize wrong year
+              // Heavily penalize wrong year
+              score: locationScore * 0.3,
             };
           }
         }
@@ -135,12 +142,14 @@ export function parseNomination(
           score: finalScore,
         };
       })
-      .filter((match) => match.score > 0.3) // Minimum threshold
+      // Minimum threshold
+      .filter((match) => match.score > 0.3)
       .toSorted((a, b) => b.score - a.score);
 
     if (showMatches.length > 0) {
       bestShow = showMatches[0].show;
-      confidence += showMatches[0].score * 0.4; // Show match contributes 40% to confidence
+      // Show match contributes 40% to confidence
+      confidence += showMatches[0].score * 0.4;
     }
   }
 
@@ -155,11 +164,15 @@ export function parseNomination(
  * Normalize song names for better matching by handling common variations
  */
 function normalizeSongName(songName: string): string {
-  return songName
-    .toLowerCase()
-    .replaceAll("-", " ") // Replace hyphens with spaces (e.g., "People-Vultures" -> "People Vultures")
-    .replaceAll(/\s+/g, " ") // Normalize multiple spaces to single space
-    .trim();
+  return (
+    songName
+      .toLowerCase()
+      // Replace hyphens with spaces (e.g., "People-Vultures" -> "People Vultures")
+      .replaceAll("-", " ")
+      // Normalize multiple spaces to single space
+      .replaceAll(/\s+/gu, " ")
+      .trim()
+  );
 }
 
 /**
@@ -183,8 +196,8 @@ function calculateSimilarity(str1: string, str2: string): number {
   }
 
   // Word-based similarity using normalized strings
-  const words1 = norm1.split(/\s+/);
-  const words2 = norm2.split(/\s+/);
+  const words1 = norm1.split(/\s+/u);
+  const words2 = norm2.split(/\s+/u);
 
   let matchingWords = 0;
   for (const word1 of words1) {
@@ -214,13 +227,13 @@ function calculateSimilarity(str1: string, str2: string): number {
 function cleanLocation(loc: string): string {
   return loc
     .replaceAll(
-      /\b(the\s+)?(\w+\s+)?(auditorium|arena|theatre|theater|hall|center|centre|club|venue)\b/gi,
+      /\b(the\s+)?(\w+\s+)?(auditorium|arena|theatre|theater|hall|center|centre|club|venue)\b/giu,
       "",
     )
-    .replaceAll(/\b(red\s+rocks|red\s+rocks\s+amphitheatre)\b/gi, "red rocks")
-    .replaceAll(/\b(new\s+york|nyc|ny)\b/gi, "new york")
-    .replaceAll(/\b(los\s+angeles|la|l\.a\.)\b/gi, "los angeles")
-    .replaceAll(/\b(san\s+francisco|sf)\b/gi, "san francisco")
+    .replaceAll(/\b(red\s+rocks|red\s+rocks\s+amphitheatre)\b/giu, "red rocks")
+    .replaceAll(/\b(new\s+york|nyc|ny)\b/giu, "new york")
+    .replaceAll(/\b(los\s+angeles|la|l\.a\.)\b/giu, "los angeles")
+    .replaceAll(/\b(san\s+francisco|sf)\b/giu, "san francisco")
     .trim();
 }
 
@@ -253,9 +266,12 @@ function levenshteinSimilarity(str1: string, str2: string): number {
     for (let i = 1; i <= str1.length; i++) {
       const substitutionCost = str1[i - 1] === str2[j - 1] ? 0 : 1;
       matrix[j][i] = Math.min(
-        matrix[j][i - 1] + 1, // deletion
-        matrix[j - 1][i] + 1, // insertion
-        matrix[j - 1][i - 1] + substitutionCost, // substitution
+        // deletion
+        matrix[j][i - 1] + 1,
+        // insertion
+        matrix[j - 1][i] + 1,
+        // substitution
+        matrix[j - 1][i - 1] + substitutionCost,
       );
     }
   }

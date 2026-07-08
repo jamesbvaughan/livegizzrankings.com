@@ -29,13 +29,13 @@ export async function sendEditNotification(data: EditNotificationData) {
 
   try {
     const { userId } = await authWithSentry();
-    const userInfo = userId || "Unknown user";
+    const userInfo = userId ?? "Unknown user";
 
     // Fetch entity title and URL based on type
     let entityTitle: string | undefined;
     let entityUrl: string | undefined;
     const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "https://livegizzrankings.com";
+      process.env.NEXT_PUBLIC_BASE_URL ?? "https://livegizzrankings.com";
 
     if (data.entityId) {
       try {

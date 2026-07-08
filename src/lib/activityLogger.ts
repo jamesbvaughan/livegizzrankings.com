@@ -23,8 +23,8 @@ async function logActivity(params: LogActivityParams): Promise<void> {
     action: params.action,
     entityType: params.entityType,
     entityId: params.entityId,
-    entityBefore: params.entityBefore || null,
-    entityAfter: params.entityAfter || null,
+    entityBefore: params.entityBefore ?? null,
+    entityAfter: params.entityAfter ?? null,
   });
 }
 

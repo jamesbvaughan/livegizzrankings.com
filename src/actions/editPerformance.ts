@@ -82,9 +82,9 @@ export async function editPerformance(
         songId,
         showId,
         showPosition,
-        bandcampTrackId: bandcampTrackId || null,
-        youtubeVideoId: youtubeVideoId || null,
-        youtubeVideoStartTime: youtubeVideoStartTime || null,
+        bandcampTrackId: bandcampTrackId ?? null,
+        youtubeVideoId: youtubeVideoId ?? null,
+        youtubeVideoStartTime: youtubeVideoStartTime ?? null,
       })
       .where(eq(performances.id, performanceId))
       .returning();
@@ -117,5 +117,5 @@ export async function editPerformance(
   revalidatePath(`/shows/${showId}`);
   revalidatePath(performancePath);
 
-  redirect(performancePath);
+  return redirect(performancePath);
 }

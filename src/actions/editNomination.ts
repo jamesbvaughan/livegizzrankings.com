@@ -30,7 +30,7 @@ export async function editNomination(
   await db
     .update(nominations)
     .set({
-      performanceId: performanceId || null,
+      performanceId: performanceId ?? null,
       willNotAdd,
     })
     .where(eq(nominations.id, nominationId));

@@ -37,7 +37,7 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-const clerkAppearance = { baseTheme: dark };
+const clerkAppearance = { theme: dark };
 
 const cloudflareAnalyticsToken = process.env.CLOUDFLARE_ANALYTICS_TOKEN;
 
@@ -47,9 +47,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider appearance={clerkAppearance}>
-      <html lang="en">
-        <body className="bg-background text-foreground overflow-y-scroll">
+    <html lang="en">
+      <body className="bg-background text-foreground overflow-y-scroll">
+        <ClerkProvider appearance={clerkAppearance}>
           <BackgroundCanvas />
 
           <div className="mx-auto max-w-[720px] px-4 pt-6 pb-10">
@@ -76,8 +76,8 @@ export default function RootLayout({
               data-cf-beacon={`{"token": "${cloudflareAnalyticsToken}"}`}
             />
           ) : null}
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

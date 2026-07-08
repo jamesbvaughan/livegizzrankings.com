@@ -47,8 +47,8 @@ export default function NominationEditForm({
         id="performanceId"
         name="performanceId"
         defaultValue={
-          getFormValue(formData, "performanceId") ||
-          nomination.performanceId ||
+          getFormValue(formData, "performanceId") ??
+          nomination.performanceId ??
           ""
         }
       >
@@ -66,7 +66,7 @@ export default function NominationEditForm({
           type="checkbox"
           id="willNotAdd"
           name="willNotAdd"
-          defaultChecked={nomination.willNotAdd || false}
+          defaultChecked={nomination.willNotAdd ?? false}
           className="h-4 w-4"
         />
         <label htmlFor="willNotAdd" className="text-sm font-medium">

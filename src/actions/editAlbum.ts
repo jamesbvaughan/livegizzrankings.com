@@ -84,5 +84,5 @@ export async function editAlbum(
   revalidatePath("/albums");
   revalidatePath(albumPath);
 
-  redirect(albumPath);
+  return redirect(albumPath);
 }

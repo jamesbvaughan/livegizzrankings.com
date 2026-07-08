@@ -119,7 +119,7 @@ export default async function AddPerformancePage({
   }
 
   // If we have a show (either from parsing or URL parameters), get its YouTube video ID
-  const selectedShowId = parsedShowId || showId;
+  const selectedShowId = parsedShowId ?? showId;
   if (selectedShowId) {
     const selectedShow = shows.find((show) => show.id === selectedShowId);
     if (selectedShow?.youtubeVideoId) {

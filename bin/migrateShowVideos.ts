@@ -27,10 +27,10 @@ async function migrateShowVideos() {
       try {
         // Check if this video already exists in show_videos
         const existing = await db.query.showVideos.findFirst({
-          where: (showVideos, { and, eq }) =>
+          where: (videos, { and, eq }) =>
             and(
-              eq(showVideos.showId, show.id),
-              eq(showVideos.youtubeVideoId, show.youtubeVideoId!),
+              eq(videos.showId, show.id),
+              eq(videos.youtubeVideoId, show.youtubeVideoId!),
             ),
         });
 

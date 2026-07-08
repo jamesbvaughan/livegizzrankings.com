@@ -83,5 +83,5 @@ export async function editSong(
   revalidatePath(`/albums/${albumId}`);
   revalidatePath(songPath);
 
-  redirect(songPath);
+  return redirect(songPath);
 }

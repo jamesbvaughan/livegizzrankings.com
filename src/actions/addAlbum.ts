@@ -69,5 +69,5 @@ export async function addAlbum(
   revalidatePath("/albums");
 
   const albumPath = getAlbumPath(newAlbum);
-  redirect(albumPath);
+  return redirect(albumPath);
 }

@@ -70,9 +70,9 @@ export async function addPerformance(
         songId,
         showId,
         showPosition,
-        bandcampTrackId: bandcampTrackId || null,
-        youtubeVideoId: youtubeVideoId || null,
-        youtubeVideoStartTime: youtubeVideoStartTime || null,
+        bandcampTrackId: bandcampTrackId ?? null,
+        youtubeVideoId: youtubeVideoId ?? null,
+        youtubeVideoStartTime: youtubeVideoStartTime ?? null,
       })
       .returning();
 
@@ -110,5 +110,5 @@ export async function addPerformance(
   }
 
   const performancePath = await getPerformancePath(newPerformance);
-  redirect(performancePath);
+  return redirect(performancePath);
 }
