@@ -10,6 +10,7 @@
     "nextjs",
     "oxc",
     "import",
+    "jsdoc",
     "jsx-a11y",
     "node",
     "promise"
@@ -29,14 +30,9 @@
     "max-lines": "off",
     "max-depth": "off",
     "max-nested-callbacks": "off",
-    "no-warning-comments": "off",
     "radix": "off",
-    "typescript/require-await": "off",
-    "jsx-no-jsx-as-prop": "off",
-    "jsx-no-new-object-as-prop": "off",
-    "jsx-no-new-array-as-prop": "off",
-    "jsx-no-new-function-as-prop": "off",
     "strict-boolean-expressions": "off",
+    "prefer-readonly-parameter-types": "off",
     // Rules I've customized the config for
     "eqeqeq": [
       "error",
@@ -45,6 +41,8 @@
         "null": "ignore"
       }
     ],
+    "jsdoc/require-param": "off",
+    "jsdoc/require-returns": "off",
     // Rules that aren't automatically included in any category I've enabled but
     // that I want.
     "curly": "error",

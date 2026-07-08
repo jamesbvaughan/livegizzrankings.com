@@ -2,13 +2,21 @@
 
 import { clsx } from "clsx";
 import Form from "next/form";
-import { useActionState, useState } from "react";
+import type { CSSProperties, ChangeEvent } from "react";
+import { useActionState, useCallback, useState } from "react";
 
 import { skipPair } from "@/actions/skipPair";
 import { vote } from "@/actions/vote";
+import { BoxedButton } from "@/components/BoxedButtonLink";
 import type { Performance, Show } from "@/drizzle/schema";
 import { getShowTitle } from "@/utils";
-import { BoxedButton } from "@/components/BoxedButtonLink";
+
+function performanceLabelStyle(imageUrl: Show["imageUrl"]): CSSProperties {
+  return {
+    backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
+    textShadow: "1px 1px 10px black",
+  };
+}
 
 export function PerformanceFormButtons({
   performanceA,
@@ -25,6 +33,17 @@ export function PerformanceFormButtons({
   );
 
   const isPending = voteIsPending || skipIsPending;
+
+  const handleWinnerChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setSelectedShow(
+        e.target.value === performanceA.id
+          ? performanceA.show
+          : performanceB.show,
+      );
+    },
+    [performanceA, performanceB],
+  );
 
   return (
     <div className="space-y-4">
@@ -48,20 +67,13 @@ export function PerformanceFormButtons({
                   id={performance.id}
                   value={performance.id}
                   checked={selectedShow === show}
-                  onChange={() => {
-                    setSelectedShow(show);
-                  }}
+                  onChange={handleWinnerChange}
                 />
                 <div className="peer-checked:border-red border-8 border-transparent">
                   <label
                     htmlFor={performance.id}
                     className="bg-muted-2 flex aspect-square w-full cursor-pointer items-center justify-center bg-cover text-center text-2xl hover:invert sm:text-4xl"
-                    style={{
-                      backgroundImage: show.imageUrl
-                        ? `url(${show.imageUrl})`
-                        : undefined,
-                      textShadow: "1px 1px 10px black",
-                    }}
+                    style={performanceLabelStyle(show.imageUrl)}
                   >
                     {performanceTitle}
                     <br />

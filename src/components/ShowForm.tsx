@@ -1,15 +1,16 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useActionState, useCallback, useMemo, useState } from "react";
 
 import type { Show, ShowVideo } from "@/drizzle/schema";
-
-import { BoxedInput } from "./BoxedInput";
-import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
-import { ShowVideoList } from "./ShowVideoList";
 import type { ActionState } from "@/lib/actionState";
 import { getFormValue, initialActionState } from "@/lib/actionState";
 import { extractBandcampAlbumId } from "@/lib/extractEmbedCodes";
+
+import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
+import { BoxedInput } from "./BoxedInput";
+import { ShowVideoList } from "./ShowVideoList";
 
 interface ShowFormProps {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -18,10 +19,12 @@ interface ShowFormProps {
   submitLabel?: string;
 }
 
+const noVideos: ShowVideo[] = [];
+
 export default function ShowForm({
   action,
   show,
-  videos = [],
+  videos = noVideos,
   submitLabel = "Save",
 }: ShowFormProps) {
   const [{ errorMessage, formData }, formAction, pending] = useActionState(
@@ -30,7 +33,23 @@ export default function ShowForm({
   );
 
   const [bandcampAlbumId, setBandcampAlbumId] = useState(
-    getFormValue(formData, "bandcampAlbumId") || show?.bandcampAlbumId || "",
+    getFormValue(formData, "bandcampAlbumId") ?? show?.bandcampAlbumId ?? "",
+  );
+
+  const handleBandcampAlbumIdChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setBandcampAlbumId(extractBandcampAlbumId(e.target.value));
+    },
+    [],
+  );
+
+  const defaultVideos = useMemo(
+    () =>
+      videos.map((v) => ({
+        youtubeVideoId: v.youtubeVideoId,
+        title: v.title,
+      })),
+    [videos],
   );
 
   return (
@@ -48,7 +67,7 @@ export default function ShowForm({
         pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
         minLength={1}
         maxLength={100}
-        defaultValue={getFormValue(formData, "slug") || show?.slug}
+        defaultValue={getFormValue(formData, "slug") ?? show?.slug}
         placeholder="atlanta-2024"
         helpText="URL-friendly identifier (lowercase, hyphens, typically <location>-<year> format)"
         errorMessage="Slug must be lowercase letters, numbers, and hyphens only"
@@ -62,7 +81,7 @@ export default function ShowForm({
         required
         minLength={1}
         maxLength={300}
-        defaultValue={getFormValue(formData, "location") || show?.location}
+        defaultValue={getFormValue(formData, "location") ?? show?.location}
         placeholder="Atlanta"
         helpText="Show location, typically just a country or city or festival name, whatever people commonly use to refer to the show."
         errorMessage="Location is required and must be between 1-300 characters"
@@ -74,7 +93,7 @@ export default function ShowForm({
         name="date"
         type="date"
         required
-        defaultValue={getFormValue(formData, "date") || show?.date}
+        defaultValue={getFormValue(formData, "date") ?? show?.date}
         helpText="If there were multiple nights, use the date of the first one."
         errorMessage="Please select a valid date"
       />
@@ -85,7 +104,7 @@ export default function ShowForm({
         name="imageUrl"
         type="url"
         required
-        defaultValue={getFormValue(formData, "imageUrl") || show?.imageUrl}
+        defaultValue={getFormValue(formData, "imageUrl") ?? show?.imageUrl}
         placeholder="https://example.com/image.jpg"
         helpText="URL for an image of the show's cover art"
         errorMessage="Please provide a valid image URL"
@@ -98,21 +117,13 @@ export default function ShowForm({
         type="text"
         pattern="^\d+$"
         value={bandcampAlbumId}
-        onChange={(e) => {
-          const extractedId = extractBandcampAlbumId(e.target.value);
-          setBandcampAlbumId(extractedId);
-        }}
+        onChange={handleBandcampAlbumIdChange}
         placeholder="e.g., 1234567890 or paste embed code"
         helpText="Paste the Bandcamp album ID or the full embed code (either format) and the album ID will be extracted automatically."
         errorMessage="Bandcamp Album ID must contain only digits"
       />
 
-      <ShowVideoList
-        defaultVideos={videos.map((v) => ({
-          youtubeVideoId: v.youtubeVideoId,
-          title: v.title,
-        }))}
-      />
+      <ShowVideoList defaultVideos={defaultVideos} />
 
       <div className="flex gap-4">
         <BoxedButton type="submit" disabled={pending}>

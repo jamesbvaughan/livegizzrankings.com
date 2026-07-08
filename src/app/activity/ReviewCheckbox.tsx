@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useOptimistic, useTransition } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback, useId, useOptimistic, useTransition } from "react";
 
 import { setActivityReviewed } from "@/actions/setActivityReviewed";
 
@@ -16,12 +17,16 @@ export function ReviewCheckbox({
     useOptimistic(serverIsReviewed);
   const [_isPending, startTransition] = useTransition();
 
-  const handleChange = (checked: boolean) => {
-    startTransition(async () => {
-      setOptimisticIsReviewed(checked);
-      await setActivityReviewed({ activityLogId, isReviewed: checked });
-    });
-  };
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const checked = e.target.checked;
+      startTransition(async () => {
+        setOptimisticIsReviewed(checked);
+        await setActivityReviewed({ activityLogId, isReviewed: checked });
+      });
+    },
+    [activityLogId, setOptimisticIsReviewed, startTransition],
+  );
 
   return (
     <label
@@ -32,9 +37,7 @@ export function ReviewCheckbox({
         id={inputId}
         type="checkbox"
         checked={optimisticIsReviewed}
-        onChange={(e) => {
-          handleChange(e.target.checked);
-        }}
+        onChange={handleChange}
         className="cursor-pointer"
       />
       <span>Reviewed</span>

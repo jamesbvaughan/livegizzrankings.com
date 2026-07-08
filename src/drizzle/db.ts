@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-unassigned-import
 import "@/drizzle/envConfig";
-
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import { drizzle as drizzleWebsocket } from "drizzle-orm/neon-serverless";
 

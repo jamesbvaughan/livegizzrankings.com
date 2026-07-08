@@ -118,7 +118,8 @@ export const votes = pgTable("votes", {
   winnerId: uuid("winner_id")
     .notNull()
     .references(() => performances.id),
-  voterId: text("voter_id").notNull(), // References the Clerk user ID
+  // References the Clerk user ID
+  voterId: text("voter_id").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -155,12 +156,18 @@ export type Nomination = typeof nominations.$inferSelect;
 
 export const activityLogs = pgTable("activity_logs", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(), // Clerk user ID
-  action: text("action").notNull(), // "create", "update", "delete"
-  entityType: text("entity_type").notNull(), // "album", "song", "show", "performance"
-  entityId: uuid("entity_id").notNull(), // ID of the modified entity
-  entityBefore: jsonb("entity_before").$type<Record<string, any>>(), // null for creates
-  entityAfter: jsonb("entity_after").$type<Record<string, any>>(), // null for deletes
+  // Clerk user ID
+  userId: text("user_id").notNull(),
+  // "create", "update", "delete"
+  action: text("action").notNull(),
+  // "album", "song", "show", "performance"
+  entityType: text("entity_type").notNull(),
+  // ID of the modified entity
+  entityId: uuid("entity_id").notNull(),
+  // null for creates
+  entityBefore: jsonb("entity_before").$type<Record<string, any>>(),
+  // null for deletes
+  entityAfter: jsonb("entity_after").$type<Record<string, any>>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -173,7 +180,8 @@ export const activityLogReviews = pgTable(
     activityLogId: uuid("activity_log_id")
       .notNull()
       .references(() => activityLogs.id),
-    userId: text("user_id").notNull(), // Clerk user ID
+    // Clerk user ID
+    userId: text("user_id").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [unique().on(t.activityLogId, t.userId)],
@@ -195,7 +203,8 @@ export const skippedPairs = pgTable(
   "skipped_pairs",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: text("user_id").notNull(), // Clerk user ID
+    // Clerk user ID
+    userId: text("user_id").notNull(),
     performanceAId: uuid("performance_a_id")
       .notNull()
       .references(() => performances.id),

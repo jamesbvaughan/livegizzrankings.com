@@ -1,7 +1,7 @@
 import { YouTubeEmbed } from "@next/third-parties/google";
+import Link from "next/link";
 
 import type { Performance, Show } from "@/drizzle/schema";
-import Link from "next/link";
 
 function SpotifyPlayer({ spotifyTrackId }: { spotifyTrackId: string }) {
   return (

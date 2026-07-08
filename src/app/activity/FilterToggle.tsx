@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
 export function FilterToggle() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showAll = searchParams.get("showAll") === "true";
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     const params = new URLSearchParams(searchParams);
     if (showAll) {
       params.delete("showAll");
@@ -15,7 +16,7 @@ export function FilterToggle() {
       params.set("showAll", "true");
     }
     router.push(`/activity?${params.toString()}`);
-  };
+  }, [router, searchParams, showAll]);
 
   return (
     <button

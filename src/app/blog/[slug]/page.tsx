@@ -21,8 +21,6 @@ export function generateStaticParams() {
   }));
 }
 
-export const dynamicParams = false;
-
 interface Params {
   slug: string;
 }
@@ -33,7 +31,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPosts().find((post) => post.slug === slug);
+  const post = getBlogPosts().find((p) => p.slug === slug);
   if (!post) {
     notFound();
   }
@@ -59,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getBlogPosts().find((post) => post.slug === slug);
+  const post = getBlogPosts().find((p) => p.slug === slug);
   if (!post) {
     notFound();
   }

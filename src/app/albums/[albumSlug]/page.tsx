@@ -1,9 +1,10 @@
 import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 
-import { isAdmin } from "@/auth/utils";
+import { AdminOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { SongRow } from "@/components/SongRow";
 import {
@@ -15,6 +16,11 @@ import {
 import { getAlbumBySlug } from "@/dbUtils";
 import { db } from "@/drizzle/db";
 import { songs } from "@/drizzle/schema";
+
+export async function generateStaticParams(): Promise<Params[]> {
+  const allAlbums = await db.query.albums.findMany({ columns: { slug: true } });
+  return allAlbums.map((album) => ({ albumSlug: album.slug }));
+}
 
 interface Params {
   albumSlug: string;
@@ -33,17 +39,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Album({ params }: Props) {
-  const { albumSlug } = await params;
-  const [album, adminStatus] = await Promise.all([
-    getAlbumBySlug(albumSlug),
-    isAdmin(),
-  ]);
+async function getAlbumSongs(albumId: string) {
+  "use cache";
+  cacheTag("songs");
+  cacheLife("hours");
 
-  const albumSongs = await db.query.songs.findMany({
-    where: eq(songs.albumId, album.id),
+  const result = await db.query.songs.findMany({
+    where: eq(songs.albumId, albumId),
     orderBy: asc(songs.albumPosition),
   });
+
+  return result;
+}
+
+export default async function Album({ params }: Props) {
+  const { albumSlug } = await params;
+  const album = await getAlbumBySlug(albumSlug);
+
+  const albumSongs = await getAlbumSongs(album.id);
 
   const releaseDate = new Date(album.releaseDate);
   const formattedReleaseDate = new Intl.DateTimeFormat(undefined, {
@@ -59,7 +72,7 @@ export default async function Album({ params }: Props) {
 
       <div className="flex items-center justify-between">
         <PageTitle>{album.title}</PageTitle>
-        {adminStatus && (
+        <AdminOnly>
           <div className="flex gap-2">
             <BoxedButtonLink href={`/songs/add?album=${album.id}`}>
               Add Song
@@ -68,7 +81,7 @@ export default async function Album({ params }: Props) {
               Edit Album
             </BoxedButtonLink>
           </div>
-        )}
+        </AdminOnly>
       </div>
 
       <PageSubtitle>

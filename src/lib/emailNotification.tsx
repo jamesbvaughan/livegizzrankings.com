@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import EditNotification from "../emails/EditNotification";
-import { getResendClient } from "./resendClient";
+
+import { authWithSentry } from "@/auth/utils";
 import { db } from "@/drizzle/db";
 import { shows, performances, songs, albums } from "@/drizzle/schema";
 import {
@@ -11,7 +11,9 @@ import {
   getSongPath,
   getAlbumPath,
 } from "@/utils";
-import { authWithSentry } from "@/auth/utils";
+
+import EditNotification from "../emails/EditNotification";
+import { getResendClient } from "./resendClient";
 
 interface EditNotificationData {
   entityType: string;
@@ -29,13 +31,13 @@ export async function sendEditNotification(data: EditNotificationData) {
 
   try {
     const { userId } = await authWithSentry();
-    const userInfo = userId || "Unknown user";
+    const userInfo = userId ?? "Unknown user";
 
     // Fetch entity title and URL based on type
     let entityTitle: string | undefined;
     let entityUrl: string | undefined;
     const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "https://livegizzrankings.com";
+      process.env.NEXT_PUBLIC_BASE_URL ?? "https://livegizzrankings.com";
 
     if (data.entityId) {
       try {

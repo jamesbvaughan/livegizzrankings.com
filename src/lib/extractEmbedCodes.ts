@@ -1,12 +1,12 @@
 export function extractBandcampAlbumId(input: string): string {
   // If it's already just an album ID (only digits), return as-is
-  if (/^\d+$/.test(input.trim())) {
+  if (/^\d+$/u.test(input.trim())) {
     return input.trim();
   }
 
   // Handle shortcode format: [bandcamp ... album=3446736804 ...]
   // or iframe format with album= parameter
-  const albumMatch = input.match(/album=(\d+)/);
+  const albumMatch = input.match(/album=(\d+)/u);
   if (albumMatch) {
     return albumMatch[1];
   }
@@ -17,12 +17,12 @@ export function extractBandcampAlbumId(input: string): string {
 
 export function extractBandcampTrackId(input: string): string {
   // If it's already just a track ID (only digits), return as-is
-  if (/^\d+$/.test(input.trim())) {
+  if (/^\d+$/u.test(input.trim())) {
     return input.trim();
   }
 
   // Handle shortcode format: [bandcamp ... track=1136114588 ...]
-  const shortcodeMatch = input.match(/track=(\d+)/);
+  const shortcodeMatch = input.match(/track=(\d+)/u);
   if (shortcodeMatch) {
     return shortcodeMatch[1];
   }
@@ -33,7 +33,7 @@ export function extractBandcampTrackId(input: string): string {
 
 export function extractYouTubeVideoId(input: string): string {
   // If it's already just a video ID (no slashes or special chars), return as-is
-  if (!/[/:?&]/.test(input)) {
+  if (!/[/:?&]/u.test(input)) {
     return input;
   }
 
@@ -84,16 +84,16 @@ export function extractYouTubeStartTime(input: string): number | null {
     const tParam = url.searchParams.get("t");
     if (tParam) {
       // Remove 's' suffix if present (e.g., "123s" -> "123")
-      const seconds = parseInt(tParam.replace(/s$/, ""), 10);
+      const seconds = Math.trunc(Number(tParam.replace(/s$/u, "")));
       if (!isNaN(seconds)) {
         return seconds;
       }
     }
 
     // Check for t in hash (e.g., #t=123)
-    const hashMatch = url.hash.match(/[#&]t=(\d+)/);
+    const hashMatch = url.hash.match(/[#&]t=(\d+)/u);
     if (hashMatch) {
-      const seconds = parseInt(hashMatch[1], 10);
+      const seconds = Math.trunc(Number(hashMatch[1]));
       if (!isNaN(seconds)) {
         return seconds;
       }

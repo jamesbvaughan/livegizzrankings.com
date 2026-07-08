@@ -3,16 +3,16 @@
 import { useActionState } from "react";
 
 import type { Album, Song } from "@/drizzle/schema";
-
-import { BoxedInput } from "./BoxedInput";
-import { BoxedSelect } from "./BoxedSelect";
-import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
 import type { ActionState } from "@/lib/actionState";
 import {
   getFormNumberValue,
   getFormValue,
   initialActionState,
 } from "@/lib/actionState";
+
+import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
+import { BoxedInput } from "./BoxedInput";
+import { BoxedSelect } from "./BoxedSelect";
 
 interface SongFormProps {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -54,7 +54,7 @@ export default function SongForm({
         required
         minLength={1}
         maxLength={300}
-        defaultValue={getFormValue(formData, "title") || song?.title}
+        defaultValue={getFormValue(formData, "title") ?? song?.title}
         errorMessage="Title is required and must be between 1-300 characters"
       />
 
@@ -67,7 +67,7 @@ export default function SongForm({
         pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
         minLength={1}
         maxLength={100}
-        defaultValue={getFormValue(formData, "slug") || song?.slug}
+        defaultValue={getFormValue(formData, "slug") ?? song?.slug}
         placeholder="e.g., robot-stop"
         helpText="URL-friendly version of the title (lowercase, hyphens instead of spaces)"
         errorMessage="Slug must be lowercase letters, numbers, and hyphens only (e.g., 'robot-stop')"
@@ -79,7 +79,7 @@ export default function SongForm({
         name="albumId"
         required
         defaultValue={
-          getFormValue(formData, "albumId") || song?.albumId || defaultAlbumId
+          getFormValue(formData, "albumId") ?? song?.albumId ?? defaultAlbumId
         }
         errorMessage="Please select an album"
       >
@@ -100,7 +100,7 @@ export default function SongForm({
         min={1}
         max={99}
         defaultValue={
-          getFormNumberValue(formData, "albumPosition") || song?.albumPosition
+          getFormNumberValue(formData, "albumPosition") ?? song?.albumPosition
         }
         placeholder="1"
         helpText="Track number on the album"

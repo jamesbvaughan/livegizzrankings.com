@@ -1,10 +1,13 @@
 import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Suspense } from "react";
+import sanitizeHtml from "sanitize-html";
 
-import { isAdmin, isSignedIn } from "@/auth/utils";
+import { AdminOnly, SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { EloScore } from "@/components/EloScore";
 import { YouTubePlayer } from "@/components/MediaPlayers";
@@ -19,6 +22,11 @@ import { db } from "@/drizzle/db";
 import type { Show } from "@/drizzle/schema";
 import { performances, showVideos } from "@/drizzle/schema";
 import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";
+
+export async function generateStaticParams(): Promise<Params[]> {
+  const allShows = await db.query.shows.findMany({ columns: { slug: true } });
+  return allShows.map((show) => ({ showSlug: show.slug }));
+}
 
 interface Params {
   showSlug: string;
@@ -39,7 +47,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const bandcampIframeStyle: CSSProperties = {
+  border: 0,
+  marginTop: 8,
+  width: "100%",
+  height: 472,
+};
+
+function rawHtml(html: string) {
+  return { __html: html };
+}
+
 async function GizzTapesNote({ show }: { show: Show }) {
+  "use cache";
+  // External content that changes rarely; refetched on the "hours" schedule
+  // rather than on every page load.
+  cacheLife("hours");
+
   const gizzTapesShowId = show.date;
 
   let note;
@@ -60,15 +84,11 @@ async function GizzTapesNote({ show }: { show: Show }) {
 
   const htmlWithLineBreaks = note.replaceAll("\\n", "<br>");
 
-  // TODO: Sanitize this again.
-  // I've disabled this because I was having issues with the dompurify package.
-  //
-  // Sanitize the modified HTML string
-  // const sanitizedHtml = DOMPurify.sanitize(htmlWithLineBreaks);
+  const sanitizedHtml = sanitizeHtml(htmlWithLineBreaks);
 
   return (
     <div className="space-y-2">
-      <div dangerouslySetInnerHTML={{ __html: htmlWithLineBreaks }} />
+      <div dangerouslySetInnerHTML={rawHtml(sanitizedHtml)} />
 
       <Link
         href={`https://tapes.kglw.net/${gizzTapesShowId}/`}
@@ -83,6 +103,10 @@ async function GizzTapesNote({ show }: { show: Show }) {
 }
 
 async function PerformanceElo({ performanceId }: { performanceId: string }) {
+  "use cache";
+  cacheTag("performances");
+  cacheLife("hours");
+
   const performance = await db.query.performances.findFirst({
     where: eq(performances.id, performanceId),
   });
@@ -93,16 +117,14 @@ async function PerformanceElo({ performanceId }: { performanceId: string }) {
   return <EloScore score={performance.eloRating} />;
 }
 
-export default async function ShowPage({ params }: Props) {
-  const { showSlug } = await params;
-  const [show, adminStatus, signedIn] = await Promise.all([
-    getShowBySlug(showSlug),
-    isAdmin(),
-    isSignedIn(),
-  ]);
-  const [showPerformances, videos] = await Promise.all([
+async function getShowPageData(showId: string) {
+  "use cache";
+  cacheTag("performances", "songs", "albums", "shows");
+  cacheLife("hours");
+
+  const result = await Promise.all([
     db.query.performances.findMany({
-      where: eq(performances.showId, show.id),
+      where: eq(performances.showId, showId),
       orderBy: asc(performances.showPosition),
       with: {
         song: {
@@ -113,9 +135,17 @@ export default async function ShowPage({ params }: Props) {
       },
     }),
     db.query.showVideos.findMany({
-      where: eq(showVideos.showId, show.id),
+      where: eq(showVideos.showId, showId),
     }),
   ]);
+
+  return result;
+}
+
+export default async function ShowPage({ params }: Props) {
+  const { showSlug } = await params;
+  const show = await getShowBySlug(showSlug);
+  const [showPerformances, videos] = await getShowPageData(show.id);
 
   const showTitle = getShowTitle(show);
 
@@ -134,16 +164,16 @@ export default async function ShowPage({ params }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle>{showTitle}</PageTitle>
         <div className="flex gap-2">
-          {signedIn && (
+          <SignedInOnly>
             <BoxedButtonLink href={`/performances/add?show=${show.id}`}>
               Add Performance
             </BoxedButtonLink>
-          )}
-          {adminStatus && (
+          </SignedInOnly>
+          <AdminOnly>
             <BoxedButtonLink href={`/shows/${show.slug}/edit`}>
               Edit Show
             </BoxedButtonLink>
-          )}
+          </AdminOnly>
         </div>
       </div>
 
@@ -241,12 +271,7 @@ export default async function ShowPage({ params }: Props) {
                 {/* eslint-disable-next-line iframe-missing-sandbox */}
                 <iframe
                   title={`Bandcamp player for ${showTitle}`}
-                  style={{
-                    border: 0,
-                    marginTop: 8,
-                    width: "100%",
-                    height: 472,
-                  }}
+                  style={bandcampIframeStyle}
                   src={`https://bandcamp.com/EmbeddedPlayer/album=${show.bandcampAlbumId}/size=large/bgcol=333333/linkcol=e32c14/artwork=none/transparent=true/`}
                 />
               </>

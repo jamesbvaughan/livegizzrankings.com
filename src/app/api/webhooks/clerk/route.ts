@@ -1,5 +1,6 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { type NextRequest } from "next/server";
+
 import { getResendClient } from "@/lib/resendClient";
 
 export async function POST(req: NextRequest) {
@@ -24,8 +25,8 @@ export async function POST(req: NextRequest) {
     // Add to Resend audience
     await addToResendAudience({
       email: primaryEmail.email_address,
-      firstName: first_name || undefined,
-      lastName: last_name || undefined,
+      firstName: first_name ?? undefined,
+      lastName: last_name ?? undefined,
     });
 
     console.log(`Added user ${id} to Resend audience`);
@@ -50,7 +51,10 @@ async function addToResendAudience(data: {
   const resend = await getResendClient();
 
   const result = await resend.contacts.create({
-    audienceId,
+    // Resend migrated audiences to segments; existing audience IDs are now
+    // segment IDs.
+    // https://resend.com/docs/dashboard/segments/migrating-from-audiences-to-segments
+    segments: [{ id: audienceId }],
     email: data.email,
     firstName: data.firstName,
     lastName: data.lastName,

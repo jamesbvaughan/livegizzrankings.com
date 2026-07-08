@@ -1,8 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
+
+import type { ActionState } from "@/lib/actionState";
 
 import { ensureAdmin } from "../auth/utils";
 import { db } from "../drizzle/db";
@@ -10,8 +13,6 @@ import { songs } from "../drizzle/schema";
 import { logCreate } from "../lib/activityLogger";
 import { sendEditNotification } from "../lib/emailNotification";
 import { getSongPath } from "../utils";
-import { eq } from "drizzle-orm";
-import type { ActionState } from "@/lib/actionState";
 
 const addSongSchema = zfd.formData({
   title: zfd.text(),
@@ -63,9 +64,8 @@ export async function addSong(
     details: `Title: ${title}`,
   });
 
-  revalidatePath("/songs");
-  revalidatePath(`/albums/${albumId}`);
+  updateTag("songs");
 
   const songPath = getSongPath(newSong);
-  redirect(songPath);
+  return redirect(songPath);
 }

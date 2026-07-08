@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
+import type { Metadata } from "next";
 
 import { editShow } from "@/actions/editShow";
 import { ensureSignedIn } from "@/auth/utils";
 import ShowForm from "@/components/ShowForm";
 import { PageContent, PageTitle } from "@/components/ui";
-import { getShowTitle } from "@/utils";
 import { getShowBySlug } from "@/dbUtils";
 import { db } from "@/drizzle/db";
 import { showVideos } from "@/drizzle/schema";
+import { getShowTitle } from "@/utils";
 
 interface EditShowPageProps {
   params: Promise<{ showSlug: string }>;

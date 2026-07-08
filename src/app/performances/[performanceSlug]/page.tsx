@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { isSignedIn } from "@/auth/utils";
+import { SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { MediaPlayers } from "@/components/MediaPlayers";
 import {
@@ -11,7 +11,25 @@ import {
   PageType,
 } from "@/components/ui";
 import { getPerformanceBySlug, getShowById, getSongById } from "@/dbUtils";
-import { getShowPath, getShowTitle, getSongPath } from "@/utils";
+import { db } from "@/drizzle/db";
+import {
+  getPerformanceSlugBySongAndShow,
+  getShowPath,
+  getShowTitle,
+  getSongPath,
+} from "@/utils";
+
+export async function generateStaticParams(): Promise<Params[]> {
+  const allPerformances = await db.query.performances.findMany({
+    with: { song: true, show: true },
+  });
+  return allPerformances.map((performance) => ({
+    performanceSlug: getPerformanceSlugBySongAndShow(
+      performance.song,
+      performance.show,
+    ),
+  }));
+}
 
 interface Params {
   performanceSlug: string;
@@ -37,10 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PerformancePage({ params }: Props) {
   const { performanceSlug } = await params;
-  const [performance, signedIn] = await Promise.all([
-    getPerformanceBySlug(performanceSlug),
-    isSignedIn(),
-  ]);
+  const performance = await getPerformanceBySlug(performanceSlug);
   const show = await getShowById(performance.showId);
   const showPath = getShowPath(show);
   const showTitle = getShowTitle(show);
@@ -70,11 +85,11 @@ export default async function PerformancePage({ params }: Props) {
             {showTitle}
           </Link>
         </PageTitle>
-        {signedIn && (
+        <SignedInOnly>
           <BoxedButtonLink href={`/performances/${performanceSlug}/edit`}>
             Edit Performance
           </BoxedButtonLink>
-        )}
+        </SignedInOnly>
       </div>
 
       <PageSubtitle>{formattedDate}</PageSubtitle>

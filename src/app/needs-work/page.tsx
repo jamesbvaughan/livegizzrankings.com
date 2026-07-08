@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { ensureAdmin } from "@/auth/utils";
 import { PageContent, PageTitle } from "@/components/ui";
+
 import { InvalidBandcampIds } from "./InvalidBandcampIds";
 import { MissingBandcampTrackIds } from "./MissingBandcampTrackIds";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   description: "Database entries that need attention",
 };
 
-export const dynamic = "force-dynamic";
+const loadingFallback = <div className="text-muted">Loading...</div>;
 
 export default async function NeedsWorkPage() {
   await ensureAdmin();
@@ -25,11 +26,11 @@ export default async function NeedsWorkPage() {
           Database entries that need attention or cleanup
         </p>
 
-        <Suspense fallback={<div className="text-muted">Loading...</div>}>
+        <Suspense fallback={loadingFallback}>
           <InvalidBandcampIds />
         </Suspense>
 
-        <Suspense fallback={<div className="text-muted">Loading...</div>}>
+        <Suspense fallback={loadingFallback}>
           <MissingBandcampTrackIds />
         </Suspense>
       </PageContent>

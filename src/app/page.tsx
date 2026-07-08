@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { RecentVotes } from "./RecentVotes";
 import { RecentShows } from "./RecentShows";
+import { RecentVotes } from "./RecentVotes";
+
+const loadingFallback = <div>Loading...</div>;
 
 export default function HomePage() {
   return (
@@ -33,7 +35,7 @@ export default function HomePage() {
       <div className="space-y-4">
         <h2 className="text-3xl">Recent votes</h2>
 
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={loadingFallback}>
           <RecentVotes />
         </Suspense>
       </div>
@@ -41,7 +43,7 @@ export default function HomePage() {
       <div className="space-y-4">
         <h2 className="text-3xl">Recent shows</h2>
 
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={loadingFallback}>
           <RecentShows />
         </Suspense>
       </div>

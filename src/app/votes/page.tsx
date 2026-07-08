@@ -1,15 +1,16 @@
+import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
 import type { Show, Song, Vote } from "@/drizzle/schema";
-import { votes } from "@/drizzle/schema";
+import { votes as votesTable } from "@/drizzle/schema";
 import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";
 
 import { Converge } from "./Converge";
 import { LeftRightChart } from "./LeftRightChart";
-import { desc } from "drizzle-orm";
 
 export const metadata: Metadata = {
   title: "Votes",
@@ -134,6 +135,10 @@ function LeftRightStats({ votes }: { votes: Vote[] }) {
 }
 
 async function VotesList({ votes }: { votes: Vote[] }) {
+  "use cache";
+  cacheTag("votes", "performances", "songs", "shows");
+  cacheLife("hours");
+
   const allPerformances = await db.query.performances.findMany();
   const allSongs = await db.query.songs.findMany();
   const allShows = await db.query.shows.findMany();
@@ -193,8 +198,12 @@ async function VotesList({ votes }: { votes: Vote[] }) {
 }
 
 export default async function Votes() {
+  "use cache";
+  cacheTag("votes");
+  cacheLife("hours");
+
   const allVotes = await db.query.votes.findMany({
-    orderBy: desc(votes.createdAt),
+    orderBy: desc(votesTable.createdAt),
   });
 
   return (

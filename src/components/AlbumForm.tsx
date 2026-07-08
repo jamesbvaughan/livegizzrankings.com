@@ -1,14 +1,15 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useActionState, useCallback, useState } from "react";
 
 import type { Album } from "@/drizzle/schema";
-
-import { BoxedInput } from "./BoxedInput";
-import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
 import type { ActionState } from "@/lib/actionState";
 import { getFormValue, initialActionState } from "@/lib/actionState";
 import { extractBandcampAlbumId } from "@/lib/extractEmbedCodes";
+
+import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
+import { BoxedInput } from "./BoxedInput";
 
 interface AlbumFormProps {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -27,7 +28,14 @@ export default function AlbumForm({
   );
 
   const [bandcampAlbumId, setBandcampAlbumId] = useState(
-    getFormValue(formData, "bandcampAlbumId") || album?.bandcampAlbumId || "",
+    getFormValue(formData, "bandcampAlbumId") ?? album?.bandcampAlbumId ?? "",
+  );
+
+  const handleBandcampAlbumIdChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setBandcampAlbumId(extractBandcampAlbumId(e.target.value));
+    },
+    [],
   );
 
   return (
@@ -44,7 +52,7 @@ export default function AlbumForm({
         required
         minLength={1}
         maxLength={300}
-        defaultValue={getFormValue(formData, "title") || album?.title}
+        defaultValue={getFormValue(formData, "title") ?? album?.title}
         errorMessage="Title is required and must be between 1-300 characters"
       />
 
@@ -57,7 +65,7 @@ export default function AlbumForm({
         pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
         minLength={1}
         maxLength={100}
-        defaultValue={getFormValue(formData, "slug") || album?.slug}
+        defaultValue={getFormValue(formData, "slug") ?? album?.slug}
         placeholder="e.g., nonagon-infinity"
         helpText="URL-friendly version of the title (lowercase, hyphens instead of spaces)"
         errorMessage="Slug must be lowercase letters, numbers, and hyphens only (e.g., 'nonagon-infinity')"
@@ -72,7 +80,7 @@ export default function AlbumForm({
         min="1960-01-01"
         max={new Date().toISOString().split("T")[0]}
         defaultValue={
-          getFormValue(formData, "releaseDate") || album?.releaseDate
+          getFormValue(formData, "releaseDate") ?? album?.releaseDate
         }
         errorMessage="Please enter a valid date between 1960 and today"
       />
@@ -84,7 +92,7 @@ export default function AlbumForm({
         type="url"
         required
         pattern="https?://.*"
-        defaultValue={getFormValue(formData, "imageUrl") || album?.imageUrl}
+        defaultValue={getFormValue(formData, "imageUrl") ?? album?.imageUrl}
         placeholder="https://example.com/album-cover.jpg"
         errorMessage="Please enter a valid URL starting with http:// or https://"
       />
@@ -97,10 +105,7 @@ export default function AlbumForm({
         required
         pattern="^\d+$"
         value={bandcampAlbumId}
-        onChange={(e) => {
-          const extractedId = extractBandcampAlbumId(e.target.value);
-          setBandcampAlbumId(extractedId);
-        }}
+        onChange={handleBandcampAlbumIdChange}
         placeholder="e.g., 1234567890 or paste embed code"
         helpText="Paste the Bandcamp album ID or the full embed code (either format) and the album ID will be extracted automatically."
         errorMessage="Bandcamp Album ID must contain only digits"

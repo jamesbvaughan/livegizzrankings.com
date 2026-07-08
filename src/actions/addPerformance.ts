@@ -1,18 +1,19 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { eq, and } from "drizzle-orm";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 import z from "zod/v4";
 
+import type { ActionState } from "@/lib/actionState";
+
 import { ensureSignedIn } from "../auth/utils";
 import { getPerformancePath } from "../dbUtils";
 import { db } from "../drizzle/db";
+import { nominations, performances } from "../drizzle/schema";
 import { logCreate } from "../lib/activityLogger";
 import { sendEditNotification } from "../lib/emailNotification";
-import { eq, and } from "drizzle-orm";
-import { nominations, performances } from "../drizzle/schema";
-import type { ActionState } from "@/lib/actionState";
 
 const addPerformanceSchema = zfd.formData({
   songId: zfd.text(),
@@ -70,9 +71,9 @@ export async function addPerformance(
         songId,
         showId,
         showPosition,
-        bandcampTrackId: bandcampTrackId || null,
-        youtubeVideoId: youtubeVideoId || null,
-        youtubeVideoStartTime: youtubeVideoStartTime || null,
+        bandcampTrackId: bandcampTrackId ?? null,
+        youtubeVideoId: youtubeVideoId ?? null,
+        youtubeVideoStartTime: youtubeVideoStartTime ?? null,
       })
       .returning();
 
@@ -100,9 +101,7 @@ export async function addPerformance(
     details: `Song: ${songId}, Show: ${showId}`,
   });
 
-  revalidatePath("/performances");
-  revalidatePath(`/songs/${songId}`);
-  revalidatePath(`/shows/${showId}`);
+  updateTag("performances");
 
   // Revalidate nominations page if a nomination was linked
   if (nominationId) {
@@ -110,5 +109,5 @@ export async function addPerformance(
   }
 
   const performancePath = await getPerformancePath(newPerformance);
-  redirect(performancePath);
+  return redirect(performancePath);
 }

@@ -1,7 +1,7 @@
+import { formatDistanceToNow } from "date-fns";
 import { desc, and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 
 import { isAdmin } from "@/auth/utils";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
@@ -15,9 +15,13 @@ import type {
   Show,
   Song,
 } from "@/drizzle/schema";
-import { nominations, performances } from "@/drizzle/schema";
+import {
+  nominations as nominationsTable,
+  performances,
+} from "@/drizzle/schema";
 import { parseNomination } from "@/lib/nominationParser";
 import { getPerformanceTitle } from "@/utils";
+
 import { LinkPerformanceButton } from "./LinkPerformanceButton";
 
 export const metadata: Metadata = {
@@ -163,12 +167,32 @@ function NominationList({
   );
 }
 
+function partitionNominations(allNominations: Nomination[]) {
+  return {
+    toBeAdded: allNominations.filter(
+      (nomination) =>
+        !nomination.willNotAdd && nomination.performanceId == null,
+    ),
+    added: allNominations.filter(
+      (nomination) => nomination.performanceId != null,
+    ),
+    willNotBeAdded: allNominations.filter(
+      (nomination) => nomination.willNotAdd,
+    ),
+  };
+}
+
 export default async function NominationsPage() {
-  const [allNominations, adminStatus, songs, shows] = await Promise.all([
+  // Read auth state before any uncached queries: this marks the page as
+  // request-time-rendered, which the uncached nomination queries below
+  // require. (Nominations should stay fresh for their submitters rather than
+  // being cached.)
+  const adminStatus = await isAdmin();
+
+  const [allNominations, songs, shows] = await Promise.all([
     db.query.nominations.findMany({
-      orderBy: desc(nominations.createdAt),
+      orderBy: desc(nominationsTable.createdAt),
     }),
-    isAdmin(),
     db.query.songs.findMany({
       with: {
         album: true,
@@ -177,15 +201,7 @@ export default async function NominationsPage() {
     db.query.shows.findMany(),
   ]);
 
-  const nominationsThatWillNotBeAdded = allNominations.filter(
-    (nomination) => nomination.willNotAdd,
-  );
-  const addedNominations = allNominations.filter(
-    (nomination) => nomination.performanceId != null,
-  );
-  const nominationsToBeAdded = allNominations.filter(
-    (nomination) => !nomination.willNotAdd && nomination.performanceId == null,
-  );
+  const nominationGroups = partitionNominations(allNominations);
 
   return (
     <>
@@ -199,10 +215,11 @@ export default async function NominationsPage() {
 
         <div className="space-y-4">
           <h2 className="text-2xl">
-            Nominated performances to be added ({nominationsToBeAdded.length})
+            Nominated performances to be added (
+            {nominationGroups.toBeAdded.length})
           </h2>
           <NominationList
-            nominations={nominationsToBeAdded}
+            nominations={nominationGroups.toBeAdded}
             showEditLinks={adminStatus}
             showAddPerformanceLinks={adminStatus}
             showLinkPerformanceButtons={adminStatus}
@@ -214,10 +231,10 @@ export default async function NominationsPage() {
         <div className="space-y-4">
           <h2 className="text-2xl">
             Nominated performances that have been added (
-            {addedNominations.length})
+            {nominationGroups.added.length})
           </h2>
           <NominationList
-            nominations={addedNominations}
+            nominations={nominationGroups.added}
             showEditLinks={adminStatus}
             songs={songs}
             shows={shows}
@@ -227,14 +244,14 @@ export default async function NominationsPage() {
         <div className="space-y-4">
           <h2 className="text-2xl">
             Nominated performances will not be added (
-            {nominationsThatWillNotBeAdded.length})
+            {nominationGroups.willNotBeAdded.length})
           </h2>
           <p>
             These nominations are either ambiguous or invalid. If one of these
             is your nomination, please re-submit it with more context.
           </p>
           <NominationList
-            nominations={nominationsThatWillNotBeAdded}
+            nominations={nominationGroups.willNotBeAdded}
             showEditLinks={adminStatus}
             songs={songs}
             shows={shows}

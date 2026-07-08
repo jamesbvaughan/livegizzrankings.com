@@ -53,7 +53,8 @@ export default function BackgroundCanvas() {
         offscreenCanvasRef.current = canvas.transferControlToOffscreen();
       } catch (error) {
         reportError(error);
-        return;
+        // Return a no-op cleanup so all code paths consistently return one
+        return () => {};
       }
     }
     const offscreenCanvas = offscreenCanvasRef.current;

@@ -1,10 +1,12 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 import z from "zod/v4";
+
+import type { ActionState } from "@/lib/actionState";
 
 import { ensureSignedIn } from "../auth/utils";
 import { db } from "../drizzle/db";
@@ -12,7 +14,6 @@ import { shows, showVideos } from "../drizzle/schema";
 import { logUpdate } from "../lib/activityLogger";
 import { sendEditNotification } from "../lib/emailNotification";
 import { getShowPath } from "../utils";
-import type { ActionState } from "@/lib/actionState";
 
 const editShowSchema = zfd.formData({
   showId: zfd.text(),
@@ -83,8 +84,8 @@ export async function editShow(
         slug,
         location,
         date,
-        bandcampAlbumId: bandcampAlbumId || null,
-        youtubeVideoId: youtubeVideoId || null,
+        bandcampAlbumId: bandcampAlbumId ?? null,
+        youtubeVideoId: youtubeVideoId ?? null,
         imageUrl,
       })
       .where(eq(shows.id, showId))
@@ -119,8 +120,7 @@ export async function editShow(
 
   const showPath = getShowPath(updatedShow);
 
-  revalidatePath("/shows");
-  revalidatePath(showPath);
+  updateTag("shows");
 
-  redirect(showPath);
+  return redirect(showPath);
 }

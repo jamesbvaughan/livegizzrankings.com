@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import lgrHandwritten from "./lgr-handwritten.png";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
+
+import lgrHandwritten from "./lgr-handwritten.png";
 
 function HeaderMenu() {
   return (

@@ -1,4 +1,5 @@
 import { desc } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,6 +12,13 @@ import {
 } from "@/utils";
 
 export async function RecentVotes() {
+  "use cache";
+  // Invalidated by the `vote` action whenever a new vote is recorded. The
+  // cache lifetime is just a safety net for data (like joined show and song
+  // rows) that can change without a new vote being cast.
+  cacheTag("votes", "songs", "shows");
+  cacheLife("hours");
+
   const allVotes = await db.query.votes.findMany({
     orderBy: desc(votes.createdAt),
     limit: 5,

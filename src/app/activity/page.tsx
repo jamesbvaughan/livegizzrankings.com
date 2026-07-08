@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import { desc, eq } from "drizzle-orm";
-import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Suspense } from "react";
 import { diffLines, type Change } from "diff";
+import { desc, eq } from "drizzle-orm";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 
 import { ensureAdmin } from "@/auth/utils";
 import { PageContent, PageTitle } from "@/components/ui";
@@ -11,8 +11,6 @@ import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";
 import type { ActivityLog } from "@/drizzle/schema";
 import { getUserDisplayNames } from "@/lib/users";
-import { ReviewCheckbox } from "./ReviewCheckbox";
-import { FilterToggle } from "./FilterToggle";
 import {
   getAlbumPath,
   getPerformancePathBySongAndShow,
@@ -22,19 +20,22 @@ import {
   getSongPath,
 } from "@/utils";
 
+import { FilterToggle } from "./FilterToggle";
+import { ReviewCheckbox } from "./ReviewCheckbox";
+
 export const metadata: Metadata = {
   title: "Activity Log",
   description: "View recent activity on Live Gizz Rankings.",
 };
 
-export const dynamic = "force-dynamic";
+const filterToggleFallback = <div className="h-9 w-40" />;
 
 async function getEntityInfo(entityType: string, entityId: string) {
   try {
     switch (entityType) {
       case "album": {
         const album = await db.query.albums.findFirst({
-          where: (albums, { eq }) => eq(albums.id, entityId),
+          where: (albums) => eq(albums.id, entityId),
         });
         if (album) {
           return {
@@ -46,7 +47,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
       }
       case "song": {
         const song = await db.query.songs.findFirst({
-          where: (songs, { eq }) => eq(songs.id, entityId),
+          where: (songs) => eq(songs.id, entityId),
           with: { album: true },
         });
         if (song) {
@@ -59,7 +60,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
       }
       case "show": {
         const show = await db.query.shows.findFirst({
-          where: (shows, { eq }) => eq(shows.id, entityId),
+          where: (shows) => eq(shows.id, entityId),
         });
         if (show) {
           return {
@@ -71,7 +72,7 @@ async function getEntityInfo(entityType: string, entityId: string) {
       }
       case "performance": {
         const performance = await db.query.performances.findFirst({
-          where: (performances, { eq }) => eq(performances.id, entityId),
+          where: (performances) => eq(performances.id, entityId),
           with: {
             song: { with: { album: true } },
             show: true,
@@ -102,7 +103,7 @@ function DiffView({ before, after }: { before: any; after: any }) {
   const diff = diffLines(beforeStr, afterStr);
 
   return (
-    <div className="bg-muted-3 overflow-x-auto rounded p-2 text-xs font-mono">
+    <div className="bg-muted-3 overflow-x-auto rounded p-2 font-mono text-xs">
       {diff.map((part: Change, index: number) => {
         const color = part.added
           ? "bg-green-600/20 text-green-400"
@@ -214,7 +215,7 @@ async function ActivityLogItem({
     <div className="border-muted-2 pb-4 not-last:border-b">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2">
             <span
               className={`font-semibold capitalize ${actionColors[log.action as keyof typeof actionColors]}`}
             >
@@ -250,7 +251,7 @@ async function ActivityLogItem({
           </div>
         </div>
 
-        <div className="text-muted flex flex-col items-end gap-2 flex-shrink-0">
+        <div className="text-muted flex flex-shrink-0 flex-col items-end gap-2">
           <div>
             <div>{formatDistanceToNow(log.createdAt, { addSuffix: true })}</div>
             <time className="text-sm">{log.createdAt.toLocaleString()}</time>
@@ -261,7 +262,7 @@ async function ActivityLogItem({
 
       {log.action === "create" && log.entityAfter && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-green-600 mb-1">
+          <div className="mb-1 text-xs font-semibold text-green-600">
             Created data:
           </div>
           <pre className="bg-muted-3 overflow-x-auto rounded p-2 text-xs">
@@ -272,14 +273,14 @@ async function ActivityLogItem({
 
       {log.action === "update" && log.entityBefore && log.entityAfter && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-muted mb-1">Changes:</div>
+          <div className="text-muted mb-1 text-xs font-semibold">Changes:</div>
           <DiffView before={log.entityBefore} after={log.entityAfter} />
         </div>
       )}
 
       {log.action === "delete" && log.entityBefore && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-red mb-1">
+          <div className="text-red mb-1 text-xs font-semibold">
             Deleted data:
           </div>
           <pre className="bg-muted-3 overflow-x-auto rounded p-2 text-xs">
@@ -335,7 +336,7 @@ export default async function ActivityPage({
               ? `Showing all activity (${filteredLogs.length} entries)`
               : `Showing unreviewed activity (${filteredLogs.length} entries)`}
           </p>
-          <Suspense fallback={<div className="h-9 w-40" />}>
+          <Suspense fallback={filterToggleFallback}>
             <FilterToggle />
           </Suspense>
         </div>

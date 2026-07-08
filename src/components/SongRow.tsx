@@ -1,4 +1,5 @@
 import { count, desc, eq } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import pluralize from "pluralize";
@@ -14,9 +15,13 @@ import {
   getSongPath,
 } from "@/utils";
 
-import { OnlyAdmins } from "./OnlyAdmins";
+import { AdminOnly } from "./authGates";
 
 async function VoteCount({ song }: { song: Song }) {
+  "use cache";
+  cacheTag("votes");
+  cacheLife("hours");
+
   const [songVotes] = await db
     .select({ songId: performances.songId, voteCount: count(votes.id) })
     .from(votes)
@@ -30,6 +35,10 @@ async function VoteCount({ song }: { song: Song }) {
 }
 
 async function TopPerformance({ song }: { song: Song }) {
+  "use cache";
+  cacheTag("performances", "shows");
+  cacheLife("hours");
+
   const performance = await db.query.performances.findFirst({
     where: eq(performances.songId, song.id),
     orderBy: desc(performances.eloRating),
@@ -69,10 +78,20 @@ const loadingTopPerformanceFallback = (
   <span className="text-right">Loading top performance...</span>
 );
 
-export async function SongRow({ song }: { song: Song }) {
-  const songPerformances = await db.query.performances.findMany({
-    where: eq(performances.songId, song.id),
+async function getSongPerformances(songId: string) {
+  "use cache";
+  cacheTag("performances");
+  cacheLife("hours");
+
+  const result = await db.query.performances.findMany({
+    where: eq(performances.songId, songId),
   });
+
+  return result;
+}
+
+export async function SongRow({ song }: { song: Song }) {
+  const songPerformances = await getSongPerformances(song.id);
 
   const songPath = getSongPath(song);
 
@@ -100,11 +119,9 @@ export async function SongRow({ song }: { song: Song }) {
               <div className="shrink-0">
                 {pluralize("performance", songPerformances.length, true)}
 
-                <OnlyAdmins>
-                  <Suspense fallback={null}>
-                    <VoteCount song={song} />
-                  </Suspense>
-                </OnlyAdmins>
+                <AdminOnly>
+                  <VoteCount song={song} />
+                </AdminOnly>
               </div>
 
               <Suspense fallback={loadingTopPerformanceFallback}>

@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import { forbidden, unauthorized } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
+import { forbidden, unauthorized } from "next/navigation";
 
 export async function authWithSentry() {
   const session = await auth();
@@ -40,8 +40,7 @@ export async function ensureAdmin(): Promise<string> {
     unauthorized();
   }
 
-  const isAdmin = !!sessionClaims?.meta?.isAdmin;
-  if (!isAdmin) {
+  if (!sessionClaims?.meta?.isAdmin) {
     forbidden();
   }
 

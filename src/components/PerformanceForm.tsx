@@ -1,24 +1,25 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import Link from "next/link";
+import type { ChangeEvent } from "react";
+import { useActionState, useCallback, useState } from "react";
 
 import type { Album, Performance, Show, Song } from "@/drizzle/schema";
-
-import { BoxedInput } from "./BoxedInput";
-import { BoxedSelect } from "./BoxedSelect";
-import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
 import type { ActionState } from "@/lib/actionState";
 import {
   getFormValue,
   getFormNumberValue,
   initialActionState,
 } from "@/lib/actionState";
-import Link from "next/link";
 import {
   extractBandcampTrackId,
   extractYouTubeVideoId,
   extractYouTubeStartTime,
 } from "@/lib/extractEmbedCodes";
+
+import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
+import { BoxedInput } from "./BoxedInput";
+import { BoxedSelect } from "./BoxedSelect";
 
 interface PerformanceFormProps {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -49,15 +50,15 @@ export default function PerformanceForm({
   );
 
   const [bandcampTrackId, setBandcampTrackId] = useState(
-    getFormValue(formData, "bandcampTrackId") ||
-      performance?.bandcampTrackId ||
+    getFormValue(formData, "bandcampTrackId") ??
+      performance?.bandcampTrackId ??
       "",
   );
 
   const [youtubeVideoId, setYoutubeVideoId] = useState(
-    getFormValue(formData, "youtubeVideoId") ||
-      performance?.youtubeVideoId ||
-      defaultYoutubeVideoId ||
+    getFormValue(formData, "youtubeVideoId") ??
+      performance?.youtubeVideoId ??
+      defaultYoutubeVideoId ??
       "",
   );
 
@@ -65,6 +66,35 @@ export default function PerformanceForm({
     getFormNumberValue(formData, "youtubeVideoStartTime") ??
       performance?.youtubeVideoStartTime ??
       undefined,
+  );
+
+  const handleBandcampTrackIdChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setBandcampTrackId(extractBandcampTrackId(e.target.value));
+    },
+    [],
+  );
+
+  const handleYoutubeVideoIdChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const input = e.target.value;
+      setYoutubeVideoId(extractYouTubeVideoId(input));
+
+      // If a URL with time is pasted, extract and set the start time
+      const extractedTime = extractYouTubeStartTime(input);
+      if (extractedTime !== null) {
+        setYoutubeStartTime(extractedTime);
+      }
+    },
+    [],
+  );
+
+  const handleYoutubeStartTimeChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setYoutubeStartTime(value ? Math.trunc(Number(value)) : undefined);
+    },
+    [],
   );
 
   // Group songs by album, sorted by release date (newest first)
@@ -94,7 +124,7 @@ export default function PerformanceForm({
         new Date(a.album.releaseDate).getTime(),
     )
     .map((group) => ({
-      ...group,
+      album: group.album,
       songs: group.songs.toSorted((a, b) => a.albumPosition - b.albumPosition),
     }));
 
@@ -120,8 +150,8 @@ export default function PerformanceForm({
         name="songId"
         required
         defaultValue={
-          getFormValue(formData, "songId") ||
-          performance?.songId ||
+          getFormValue(formData, "songId") ??
+          performance?.songId ??
           defaultSongId
         }
         errorMessage="Please select a song"
@@ -147,8 +177,8 @@ export default function PerformanceForm({
         name="showId"
         required
         defaultValue={
-          getFormValue(formData, "showId") ||
-          performance?.showId ||
+          getFormValue(formData, "showId") ??
+          performance?.showId ??
           defaultShowId
         }
         errorMessage="Please select a show"
@@ -176,7 +206,7 @@ export default function PerformanceForm({
         min={1}
         max={99}
         defaultValue={
-          getFormNumberValue(formData, "showPosition") ||
+          getFormNumberValue(formData, "showPosition") ??
           performance?.showPosition
         }
         placeholder="1"
@@ -191,10 +221,7 @@ export default function PerformanceForm({
         type="text"
         pattern="^\d+$"
         value={bandcampTrackId}
-        onChange={(e) => {
-          const extractedId = extractBandcampTrackId(e.target.value);
-          setBandcampTrackId(extractedId);
-        }}
+        onChange={handleBandcampTrackIdChange}
         placeholder="e.g., 1234567890 or paste embed code"
         helpText={
           <>
@@ -219,17 +246,7 @@ export default function PerformanceForm({
         name="youtubeVideoId"
         type="text"
         value={youtubeVideoId}
-        onChange={(e) => {
-          const input = e.target.value;
-          const extractedId = extractYouTubeVideoId(input);
-          setYoutubeVideoId(extractedId);
-
-          // If a URL with time is pasted, extract and set the start time
-          const extractedTime = extractYouTubeStartTime(input);
-          if (extractedTime !== null) {
-            setYoutubeStartTime(extractedTime);
-          }
-        }}
+        onChange={handleYoutubeVideoIdChange}
         placeholder="e.g., dQw4w9WgXcQ or paste full YouTube URL"
         helpText="Paste a YouTube URL or video ID. If the URL includes a timestamp, it will auto-fill the start time field below."
         errorMessage="Must be a valid YouTube video ID"
@@ -242,10 +259,7 @@ export default function PerformanceForm({
         type="number"
         min={0}
         value={youtubeStartTime ?? ""}
-        onChange={(e) => {
-          const value = e.target.value;
-          setYoutubeStartTime(value ? parseInt(value, 10) : undefined);
-        }}
+        onChange={handleYoutubeStartTimeChange}
         placeholder="0"
         helpText="Start time in seconds for this song in the YouTube video. You can get this from the YouTube URL by pausing the video at the song start, right-clicking on the video, and selecting 'Copy video URL at current time'."
         errorMessage="Start time must be 0 or greater"

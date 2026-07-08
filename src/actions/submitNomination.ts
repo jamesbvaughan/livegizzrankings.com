@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import { authWithSentry } from "@/auth/utils";
 import { db } from "@/drizzle/db";
 import { nominations } from "@/drizzle/schema";
-import { authWithSentry } from "@/auth/utils";
 
 type SubmitNominationState =
   | {

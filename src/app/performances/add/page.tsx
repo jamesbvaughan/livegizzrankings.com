@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { addPerformance } from "@/actions/addPerformance";
 import { ensureSignedIn } from "@/auth/utils";
 import PerformanceForm from "@/components/PerformanceForm";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
-import { parseNomination } from "@/lib/nominationParser";
 import type { Show, Song, Album } from "@/drizzle/schema";
-import Link from "next/link";
+import { parseNomination } from "@/lib/nominationParser";
 import { getShowTitle } from "@/utils";
 
 export const metadata: Metadata = {
@@ -119,7 +119,7 @@ export default async function AddPerformancePage({
   }
 
   // If we have a show (either from parsing or URL parameters), get its YouTube video ID
-  const selectedShowId = parsedShowId || showId;
+  const selectedShowId = parsedShowId ?? showId;
   if (selectedShowId) {
     const selectedShow = shows.find((show) => show.id === selectedShowId);
     if (selectedShow?.youtubeVideoId) {

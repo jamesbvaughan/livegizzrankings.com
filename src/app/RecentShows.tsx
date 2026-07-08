@@ -1,4 +1,5 @@
 import { desc } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -7,6 +8,10 @@ import { shows } from "@/drizzle/schema";
 import { getShowPath, getShowTitle } from "@/utils";
 
 export async function RecentShows() {
+  "use cache";
+  cacheTag("shows");
+  cacheLife("hours");
+
   const recentShows = await db.query.shows.findMany({
     orderBy: desc(shows.date),
     limit: 5,

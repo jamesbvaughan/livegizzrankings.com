@@ -9,11 +9,11 @@ import type {
   Song,
   Album,
 } from "@/drizzle/schema";
-
-import { BoxedSelect } from "./BoxedSelect";
-import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
 import type { ActionState } from "@/lib/actionState";
 import { getFormValue, initialActionState } from "@/lib/actionState";
+
+import { BoxedButton, BoxedButtonLink } from "./BoxedButtonLink";
+import { BoxedSelect } from "./BoxedSelect";
 
 interface NominationEditFormProps {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -47,8 +47,8 @@ export default function NominationEditForm({
         id="performanceId"
         name="performanceId"
         defaultValue={
-          getFormValue(formData, "performanceId") ||
-          nomination.performanceId ||
+          getFormValue(formData, "performanceId") ??
+          nomination.performanceId ??
           ""
         }
       >
@@ -66,7 +66,7 @@ export default function NominationEditForm({
           type="checkbox"
           id="willNotAdd"
           name="willNotAdd"
-          defaultChecked={nomination.willNotAdd || false}
+          defaultChecked={nomination.willNotAdd ?? false}
           className="h-4 w-4"
         />
         <label htmlFor="willNotAdd" className="text-sm font-medium">
