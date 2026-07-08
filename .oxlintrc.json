@@ -10,6 +10,7 @@
     "nextjs",
     "oxc",
     "import",
+    "jsdoc",
     "jsx-a11y",
     "node",
     "promise"
@@ -40,6 +41,8 @@
         "null": "ignore"
       }
     ],
+    "jsdoc/require-param": "off",
+    "jsdoc/require-returns": "off",
     // Rules that aren't automatically included in any category I've enabled but
     // that I want.
     "curly": "error",
