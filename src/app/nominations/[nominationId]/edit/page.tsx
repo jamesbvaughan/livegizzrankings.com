@@ -49,12 +49,12 @@ export default async function EditNominationPage({
       <PageTitle>Edit Nomination</PageTitle>
 
       <PageContent>
-        <div className="mb-6 border border-muted-2 p-4">
+        <div className="border-muted-2 mb-6 border p-4">
           <p>
             <span className="font-medium">Nomination:</span>{" "}
             <span className="">{nomination.message}</span>
           </p>
-          <p className="mt-2 text-sm text-muted">
+          <p className="text-muted mt-2 text-sm">
             Submitted{" "}
             {formatDistanceToNow(nomination.createdAt, { addSuffix: true })} by{" "}
             {nomination.userId ?? "an anonymous visitor"}

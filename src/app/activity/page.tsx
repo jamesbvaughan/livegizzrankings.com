@@ -105,7 +105,7 @@ function DiffView({ before, after }: { before: any; after: any }) {
   const diff = diffLines(beforeStr, afterStr);
 
   return (
-    <div className="bg-muted-3 overflow-x-auto rounded p-2 text-xs font-mono">
+    <div className="bg-muted-3 overflow-x-auto rounded p-2 font-mono text-xs">
       {diff.map((part: Change, index: number) => {
         const color = part.added
           ? "bg-green-600/20 text-green-400"
@@ -217,7 +217,7 @@ async function ActivityLogItem({
     <div className="border-muted-2 pb-4 not-last:border-b">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2">
             <span
               className={`font-semibold capitalize ${actionColors[log.action as keyof typeof actionColors]}`}
             >
@@ -253,7 +253,7 @@ async function ActivityLogItem({
           </div>
         </div>
 
-        <div className="text-muted flex flex-col items-end gap-2 flex-shrink-0">
+        <div className="text-muted flex flex-shrink-0 flex-col items-end gap-2">
           <div>
             <div>{formatDistanceToNow(log.createdAt, { addSuffix: true })}</div>
             <time className="text-sm">{log.createdAt.toLocaleString()}</time>
@@ -264,7 +264,7 @@ async function ActivityLogItem({
 
       {log.action === "create" && log.entityAfter && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-green-600 mb-1">
+          <div className="mb-1 text-xs font-semibold text-green-600">
             Created data:
           </div>
           <pre className="bg-muted-3 overflow-x-auto rounded p-2 text-xs">
@@ -275,14 +275,14 @@ async function ActivityLogItem({
 
       {log.action === "update" && log.entityBefore && log.entityAfter && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-muted mb-1">Changes:</div>
+          <div className="text-muted mb-1 text-xs font-semibold">Changes:</div>
           <DiffView before={log.entityBefore} after={log.entityAfter} />
         </div>
       )}
 
       {log.action === "delete" && log.entityBefore && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-red mb-1">
+          <div className="text-red mb-1 text-xs font-semibold">
             Deleted data:
           </div>
           <pre className="bg-muted-3 overflow-x-auto rounded p-2 text-xs">

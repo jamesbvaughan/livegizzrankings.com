@@ -85,7 +85,7 @@ export default function UsersTable({ data }: { data: UserData[] }) {
                 <th
                   key={header.id}
                   aria-label={`Sort by ${String(header.column.columnDef.header)}`}
-                  className="cursor-pointer select-none p-4 hover:bg-muted-3"
+                  className="hover:bg-muted-3 cursor-pointer p-4 select-none"
                   onClick={header.column.getToggleSortingHandler()}
                 >
                   <div

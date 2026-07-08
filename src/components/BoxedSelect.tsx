@@ -22,13 +22,13 @@ export function BoxedSelect({
       <select
         id={id}
         {...props}
-        className="peer border-muted focus:border-foreground invalid:border-muted mt-1 block w-full border-2 bg-transparent px-2 py-1 user-invalid:border-red user-invalid:text-red focus:outline-none"
+        className="peer border-muted focus:border-foreground invalid:border-muted user-invalid:border-red user-invalid:text-red mt-1 block w-full border-2 bg-transparent px-2 py-1 focus:outline-none"
       >
         {children}
       </select>
 
       {errorMessage && (
-        <p className="mt-1 hidden text-sm text-red peer-user-invalid:block">
+        <p className="text-red mt-1 hidden text-sm peer-user-invalid:block">
           {errorMessage}
         </p>
       )}

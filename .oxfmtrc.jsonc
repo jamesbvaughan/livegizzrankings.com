@@ -3,4 +3,5 @@
   "printWidth": 80,
   "json": true,
   "sortImports": true,
+  "sortTailwindcss": true,
 }
