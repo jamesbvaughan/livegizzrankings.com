@@ -23,6 +23,11 @@ import type { Show } from "@/drizzle/schema";
 import { performances, showVideos } from "@/drizzle/schema";
 import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";
 
+export async function generateStaticParams(): Promise<Params[]> {
+  const allShows = await db.query.shows.findMany({ columns: { slug: true } });
+  return allShows.map((show) => ({ showSlug: show.slug }));
+}
+
 interface Params {
   showSlug: string;
 }

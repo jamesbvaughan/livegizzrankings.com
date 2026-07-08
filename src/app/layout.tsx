@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 
 import BackgroundCanvas from "./BackgroundCanvas";
 import { Footer } from "./Footer";
@@ -61,11 +62,17 @@ export default function RootLayout({
 
           <SentryUserManager />
 
-          {/* Vercel analytics */}
-          <Analytics />
+          {/* The Vercel analytics and speed insights components read the
+              search params internally, so they need their own Suspense
+              boundaries to avoid bailing rendering of the whole page out to
+              the client. */}
+          <Suspense fallback={null}>
+            <Analytics />
+          </Suspense>
 
-          {/* Vercel speed insights */}
-          <SpeedInsights />
+          <Suspense fallback={null}>
+            <SpeedInsights />
+          </Suspense>
 
           {/* Cloudflare analytics */}
           {cloudflareAnalyticsToken ? (

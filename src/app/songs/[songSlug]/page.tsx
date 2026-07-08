@@ -21,6 +21,11 @@ import { performances } from "@/drizzle/schema";
 import { songsNeverPlayedLive } from "@/songsNeverPlayedLive";
 import { getAlbumPath, getShowTitle } from "@/utils";
 
+export async function generateStaticParams(): Promise<Params[]> {
+  const allSongs = await db.query.songs.findMany({ columns: { slug: true } });
+  return allSongs.map((song) => ({ songSlug: song.slug }));
+}
+
 interface Params {
   songSlug: string;
 }

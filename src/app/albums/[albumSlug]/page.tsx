@@ -17,6 +17,11 @@ import { getAlbumBySlug } from "@/dbUtils";
 import { db } from "@/drizzle/db";
 import { songs } from "@/drizzle/schema";
 
+export async function generateStaticParams(): Promise<Params[]> {
+  const allAlbums = await db.query.albums.findMany({ columns: { slug: true } });
+  return allAlbums.map((album) => ({ albumSlug: album.slug }));
+}
+
 interface Params {
   albumSlug: string;
 }

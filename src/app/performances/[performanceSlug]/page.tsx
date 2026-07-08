@@ -11,7 +11,25 @@ import {
   PageType,
 } from "@/components/ui";
 import { getPerformanceBySlug, getShowById, getSongById } from "@/dbUtils";
-import { getShowPath, getShowTitle, getSongPath } from "@/utils";
+import { db } from "@/drizzle/db";
+import {
+  getPerformanceSlugBySongAndShow,
+  getShowPath,
+  getShowTitle,
+  getSongPath,
+} from "@/utils";
+
+export async function generateStaticParams(): Promise<Params[]> {
+  const allPerformances = await db.query.performances.findMany({
+    with: { song: true, show: true },
+  });
+  return allPerformances.map((performance) => ({
+    performanceSlug: getPerformanceSlugBySongAndShow(
+      performance.song,
+      performance.show,
+    ),
+  }));
+}
 
 interface Params {
   performanceSlug: string;
