@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Suspense } from "react";
+import sanitizeHtml from "sanitize-html";
 
 import { AdminOnly, SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
@@ -78,16 +79,11 @@ async function GizzTapesNote({ show }: { show: Show }) {
 
   const htmlWithLineBreaks = note.replaceAll("\\n", "<br>");
 
-  // oxlint-disable-next-line no-warning-comments
-  // TODO: Sanitize this again.
-  // I've disabled this because I was having issues with the dompurify package.
-  //
-  // Sanitize the modified HTML string
-  // const sanitizedHtml = DOMPurify.sanitize(htmlWithLineBreaks);
+  const sanitizedHtml = sanitizeHtml(htmlWithLineBreaks);
 
   return (
     <div className="space-y-2">
-      <div dangerouslySetInnerHTML={rawHtml(htmlWithLineBreaks)} />
+      <div dangerouslySetInnerHTML={rawHtml(sanitizedHtml)} />
 
       <Link
         href={`https://tapes.kglw.net/${gizzTapesShowId}/`}

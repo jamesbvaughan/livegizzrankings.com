@@ -5,7 +5,13 @@ import { notFound } from "next/navigation";
 
 import { db } from "./drizzle/db";
 import type { Performance, Show } from "./drizzle/schema";
-import { nominations, performances, shows, songs } from "./drizzle/schema";
+import {
+  albums,
+  nominations,
+  performances,
+  shows,
+  songs,
+} from "./drizzle/schema";
 import { getPerformanceSlugBySongAndShow } from "./utils";
 
 // =============================================================================
@@ -64,11 +70,12 @@ async function getPerformanceSlug(performance: Performance) {
 
 async function findPerformanceById(performanceId: string) {
   "use cache";
-  cacheTag("performances");
+  // Includes joined song and show rows, so all three tags apply.
+  cacheTag("performances", "songs", "shows");
   cacheLife("hours");
 
   const result = await db.query.performances.findFirst({
-    where: eq(shows.id, performanceId),
+    where: eq(performances.id, performanceId),
     with: { song: true, show: true },
   });
 
@@ -139,7 +146,7 @@ async function findSongById(songId: string) {
   cacheLife("hours");
 
   const result = await db.query.songs.findFirst({
-    where: eq(shows.id, songId),
+    where: eq(songs.id, songId),
   });
 
   return result;
@@ -156,11 +163,12 @@ export async function getSongById(songId: string) {
 
 async function findSongBySlug(songSlug: string) {
   "use cache";
-  cacheTag("songs");
+  // Includes the joined album row, so both tags apply.
+  cacheTag("songs", "albums");
   cacheLife("hours");
 
   const result = await db.query.songs.findFirst({
-    where: eq(shows.slug, songSlug),
+    where: eq(songs.slug, songSlug),
     with: { album: true },
   });
 
@@ -185,7 +193,7 @@ async function findAlbumBySlug(albumSlug: string) {
   cacheLife("hours");
 
   const result = await db.query.albums.findFirst({
-    where: eq(shows.slug, albumSlug),
+    where: eq(albums.slug, albumSlug),
   });
 
   return result;

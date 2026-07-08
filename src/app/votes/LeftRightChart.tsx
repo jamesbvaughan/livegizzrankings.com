@@ -73,8 +73,8 @@ const chartPlugins: Plugin<"line">[] = [
         scales: { x },
       } = chart;
 
-      // Line at x=583, when I implemented the fix for actually
-      // randomizing the order on the vote page.
+      // Line at the vote count when the fix for actually randomizing the
+      // order on the vote page was implemented.
       const xPosition = x.getPixelForValue(510);
 
       ctx.save();
@@ -90,8 +90,8 @@ const chartPlugins: Plugin<"line">[] = [
 ];
 
 export function LeftRightChart({ votes }: { votes: Vote[] }) {
-  const data = useMemo<ChartData<"line", number[], number>>(() => {
-    const ratios: number[] = [];
+  const data = useMemo<ChartData<"line", (number | null)[], number>>(() => {
+    const ratios: (number | null)[] = [];
 
     let leftVotes = 0;
     let rightVotes = 0;
@@ -101,7 +101,10 @@ export function LeftRightChart({ votes }: { votes: Vote[] }) {
       } else {
         rightVotes++;
       }
-      ratios.push(leftVotes / rightVotes);
+      // Until the first right-side vote, the ratio would be Infinity; render
+      // those points as gaps instead of putting non-finite values in the
+      // dataset.
+      ratios.push(rightVotes === 0 ? null : leftVotes / rightVotes);
     }
 
     const labels = votes.map((_, index) => index + 1);

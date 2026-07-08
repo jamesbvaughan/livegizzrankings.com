@@ -50,6 +50,7 @@
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.7",
     "resend": "^6.17.1",
+    "sanitize-html": "^2.17.5",
     "zod": "^4.4.3",
     "zod-form-data": "^3.0.3"
   },
@@ -62,6 +63,7 @@
     "@types/pluralize": "^0.0.33",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@types/sanitize-html": "^2.16.1",
     "@typescript/native-preview": "^7.0.0-dev.20260707.2",
     "drizzle-kit": "^0.31.10",
     "husky": "^9.1.7",

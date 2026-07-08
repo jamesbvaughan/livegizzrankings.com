@@ -81,34 +81,36 @@ export default function UsersTable({ data }: { data: UserData[] }) {
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                // eslint-disable-next-line click-events-have-key-events
-                <th
-                  key={header.id}
-                  aria-label={`Sort by ${String(header.column.columnDef.header)}`}
-                  className="hover:bg-muted-3 cursor-pointer p-4 select-none"
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  <div
-                    className={clsx(
-                      "flex items-center gap-1",
-                      header.column.id === "username"
-                        ? "justify-start"
-                        : "justify-end",
-                    )}
+                <th key={header.id} className="hover:bg-muted-3 p-0">
+                  {/* A real button so that sorting is keyboard-accessible */}
+                  <button
+                    type="button"
+                    aria-label={`Sort by ${String(header.column.columnDef.header)}`}
+                    className="w-full cursor-pointer p-4 select-none"
+                    onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
+                    <div
+                      className={clsx(
+                        "flex items-center gap-1",
+                        header.column.id === "username"
+                          ? "justify-start"
+                          : "justify-end",
                       )}
+                    >
+                      <div>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </div>
+                      <div>
+                        {{
+                          asc: " ↑",
+                          desc: " ↓",
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </div>
                     </div>
-                    <div>
-                      {{
-                        asc: " ↑",
-                        desc: " ↓",
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </div>
-                  </div>
+                  </button>
                 </th>
               ))}
             </tr>
