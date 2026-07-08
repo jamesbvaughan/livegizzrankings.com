@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { isAdmin } from "@/auth/utils";
+import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
 import { getAlbumPath } from "@/utils";
-import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 
 export const metadata: Metadata = {
   title: "Albums",

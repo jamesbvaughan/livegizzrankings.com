@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { addPerformance } from "@/actions/addPerformance";
 import { ensureSignedIn } from "@/auth/utils";
 import PerformanceForm from "@/components/PerformanceForm";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
-import { parseNomination } from "@/lib/nominationParser";
 import type { Show, Song, Album } from "@/drizzle/schema";
-import Link from "next/link";
+import { parseNomination } from "@/lib/nominationParser";
 import { getShowTitle } from "@/utils";
 
 export const metadata: Metadata = {

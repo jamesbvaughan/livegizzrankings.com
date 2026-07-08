@@ -1,4 +1,5 @@
 import { isNotNull } from "drizzle-orm";
+
 import { db } from "../src/drizzle/db";
 import { shows, showVideos } from "../src/drizzle/schema";
 

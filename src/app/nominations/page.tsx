@@ -1,7 +1,7 @@
+import { formatDistanceToNow } from "date-fns";
 import { desc, and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 
 import { isAdmin } from "@/auth/utils";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
@@ -21,6 +21,7 @@ import {
 } from "@/drizzle/schema";
 import { parseNomination } from "@/lib/nominationParser";
 import { getPerformanceTitle } from "@/utils";
+
 import { LinkPerformanceButton } from "./LinkPerformanceButton";
 
 export const metadata: Metadata = {

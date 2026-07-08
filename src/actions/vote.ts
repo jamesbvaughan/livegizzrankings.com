@@ -4,6 +4,8 @@ import { and, eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { zfd } from "zod-form-data";
 
+import { ensureSignedIn } from "@/auth/utils";
+
 import { db } from "../drizzle/db";
 import { performances, votes } from "../drizzle/schema";
 import {
@@ -12,7 +14,6 @@ import {
   getShowPath,
   getSongPath,
 } from "../utils";
-import { ensureSignedIn } from "@/auth/utils";
 
 const voteSchema = zfd.formData({
   performanceIdA: zfd.text(),

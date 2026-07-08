@@ -1,11 +1,11 @@
 import { eq, sql } from "drizzle-orm";
+import type { Route } from "next";
 import { notFound } from "next/navigation";
 
 import { db } from "./drizzle/db";
 import type { Performance, Show } from "./drizzle/schema";
 import { nominations, performances, shows, songs } from "./drizzle/schema";
 import { getPerformanceSlugBySongAndShow } from "./utils";
-import type { Route } from "next";
 
 // =============================================================================
 // SHOWS

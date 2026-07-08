@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 
+import { ensureSignedIn } from "@/auth/utils";
 import { db } from "@/drizzle/db";
 import { skippedPairs, votes } from "@/drizzle/schema";
-import { ensureSignedIn } from "@/auth/utils";
 
 async function generateAllPotentialPairs() {
   const pairs: Record<string, [string, string][]> = {};

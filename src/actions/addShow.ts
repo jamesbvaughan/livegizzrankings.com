@@ -1,9 +1,12 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 import z from "zod/v4";
+
+import type { ActionState } from "@/lib/actionState";
 
 import { ensureSignedIn } from "../auth/utils";
 import { db } from "../drizzle/db";
@@ -11,8 +14,6 @@ import { shows, showVideos } from "../drizzle/schema";
 import { logCreate } from "../lib/activityLogger";
 import { sendEditNotification } from "../lib/emailNotification";
 import { getShowPath } from "../utils";
-import { eq } from "drizzle-orm";
-import type { ActionState } from "@/lib/actionState";
 
 const addShowSchema = zfd.formData({
   slug: zfd.text(),

@@ -1,3 +1,4 @@
+import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -9,7 +10,6 @@ import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";
 
 import { Converge } from "./Converge";
 import { LeftRightChart } from "./LeftRightChart";
-import { desc } from "drizzle-orm";
 
 export const metadata: Metadata = {
   title: "Votes",

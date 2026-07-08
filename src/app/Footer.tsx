@@ -1,11 +1,11 @@
-import Link from "next/link";
-
-import { AccountButtons } from "./AccountButtons";
+import { currentUser } from "@clerk/nextjs/server";
 import { and, count, eq, isNull } from "drizzle-orm";
+import Link from "next/link";
 
 import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";
-import { currentUser } from "@clerk/nextjs/server";
+
+import { AccountButtons } from "./AccountButtons";
 
 async function getUnreviewedLogCount() {
   let unreviewedCount = null;

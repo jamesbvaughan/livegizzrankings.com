@@ -7,9 +7,9 @@ import { useActionState, useCallback, useState } from "react";
 
 import { skipPair } from "@/actions/skipPair";
 import { vote } from "@/actions/vote";
+import { BoxedButton } from "@/components/BoxedButtonLink";
 import type { Performance, Show } from "@/drizzle/schema";
 import { getShowTitle } from "@/utils";
-import { BoxedButton } from "@/components/BoxedButtonLink";
 
 function performanceLabelStyle(imageUrl: Show["imageUrl"]): CSSProperties {
   return {

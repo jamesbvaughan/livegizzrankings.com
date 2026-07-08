@@ -2,9 +2,11 @@
 
 import type { ChangeEvent } from "react";
 import { useCallback, useState } from "react";
-import { BoxedInput } from "./BoxedInput";
-import { BoxedButton } from "./BoxedButtonLink";
+
 import { extractYouTubeVideoId } from "@/lib/extractEmbedCodes";
+
+import { BoxedButton } from "./BoxedButtonLink";
+import { BoxedInput } from "./BoxedInput";
 
 interface Video {
   youtubeVideoId: string;

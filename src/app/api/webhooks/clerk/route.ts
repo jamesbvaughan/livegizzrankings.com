@@ -1,5 +1,6 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { type NextRequest } from "next/server";
+
 import { getResendClient } from "@/lib/resendClient";
 
 export async function POST(req: NextRequest) {

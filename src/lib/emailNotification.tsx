@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import EditNotification from "../emails/EditNotification";
-import { getResendClient } from "./resendClient";
+
+import { authWithSentry } from "@/auth/utils";
 import { db } from "@/drizzle/db";
 import { shows, performances, songs, albums } from "@/drizzle/schema";
 import {
@@ -11,7 +11,9 @@ import {
   getSongPath,
   getAlbumPath,
 } from "@/utils";
-import { authWithSentry } from "@/auth/utils";
+
+import EditNotification from "../emails/EditNotification";
+import { getResendClient } from "./resendClient";
 
 interface EditNotificationData {
   entityType: string;

@@ -4,8 +4,8 @@ import { editSong } from "@/actions/editSong";
 import { ensureAdmin } from "@/auth/utils";
 import SongForm from "@/components/SongForm";
 import { PageContent, PageTitle } from "@/components/ui";
-import { db } from "@/drizzle/db";
 import { getSongBySlug } from "@/dbUtils";
+import { db } from "@/drizzle/db";
 
 interface EditSongPageProps {
   params: Promise<{ songSlug: string }>;

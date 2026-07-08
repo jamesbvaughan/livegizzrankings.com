@@ -4,9 +4,10 @@ import { and, eq, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { zfd } from "zod-form-data";
 
+import { ensureSignedIn } from "@/auth/utils";
+
 import { db } from "../drizzle/db";
 import { skippedPairs } from "../drizzle/schema";
-import { ensureSignedIn } from "@/auth/utils";
 
 const skipPairSchema = zfd.formData({
   performanceIdA: zfd.text(),

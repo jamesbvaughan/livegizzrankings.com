@@ -1,10 +1,10 @@
 // eslint-disable-next-line no-unassigned-import
 import "./globals.css";
-
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import * as Sentry from "@sentry/nextjs";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
@@ -12,7 +12,6 @@ import BackgroundCanvas from "./BackgroundCanvas";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { SentryUserManager } from "./SentryUserManager";
-import * as Sentry from "@sentry/nextjs";
 
 const title = "Live Gizz Rankings";
 const description =

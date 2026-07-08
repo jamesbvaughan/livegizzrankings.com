@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import { desc, eq } from "drizzle-orm";
-import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Suspense } from "react";
 import { diffLines, type Change } from "diff";
+import { desc, eq } from "drizzle-orm";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 
 import { ensureAdmin } from "@/auth/utils";
 import { PageContent, PageTitle } from "@/components/ui";
@@ -11,8 +11,6 @@ import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";
 import type { ActivityLog } from "@/drizzle/schema";
 import { getUserDisplayNames } from "@/lib/users";
-import { ReviewCheckbox } from "./ReviewCheckbox";
-import { FilterToggle } from "./FilterToggle";
 import {
   getAlbumPath,
   getPerformancePathBySongAndShow,
@@ -21,6 +19,9 @@ import {
   getShowTitle,
   getSongPath,
 } from "@/utils";
+
+import { FilterToggle } from "./FilterToggle";
+import { ReviewCheckbox } from "./ReviewCheckbox";
 
 export const metadata: Metadata = {
   title: "Activity Log",

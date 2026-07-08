@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { RecentVotes } from "./RecentVotes";
 import { RecentShows } from "./RecentShows";
+import { RecentVotes } from "./RecentVotes";
 
 const loadingFallback = <div>Loading...</div>;
 
