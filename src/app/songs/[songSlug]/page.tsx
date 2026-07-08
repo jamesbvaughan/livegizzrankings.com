@@ -1,10 +1,11 @@
 import { desc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { isAdmin, isSignedIn } from "@/auth/utils";
+import { AdminOnly, SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { EloScore } from "@/components/EloScore";
 import {
@@ -79,6 +80,12 @@ async function PerformanceRow({
 }
 
 async function RankedPerformances({ songId }: { songId: string }) {
+  "use cache";
+  // The ranking includes performance Elo ratings (invalidated on every vote)
+  // along with joined show and song data.
+  cacheTag("performances", "shows", "songs");
+  cacheLife("hours");
+
   const songPerformances = await db.query.performances.findMany({
     where: eq(performances.songId, songId),
     orderBy: desc(performances.eloRating),
@@ -99,17 +106,23 @@ async function RankedPerformances({ songId }: { songId: string }) {
   );
 }
 
+async function getSongPerformances(songId: string) {
+  "use cache";
+  cacheTag("performances");
+  cacheLife("hours");
+
+  const result = await db.query.performances.findMany({
+    where: eq(performances.songId, songId),
+  });
+
+  return result;
+}
+
 export default async function Song({ params }: Props) {
   const { songSlug } = await params;
-  const [song, signedIn, adminStatus] = await Promise.all([
-    getSongBySlug(songSlug),
-    isSignedIn(),
-    isAdmin(),
-  ]);
+  const song = await getSongBySlug(songSlug);
 
-  const songPerformances = await db.query.performances.findMany({
-    where: eq(performances.songId, song.id),
-  });
+  const songPerformances = await getSongPerformances(song.id);
 
   const albumPath = getAlbumPath(song.album);
 
@@ -122,16 +135,18 @@ export default async function Song({ params }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle>{song.title}</PageTitle>
         <div className="flex gap-2">
-          {signedIn && !neverBeenPlayedLive && (
-            <BoxedButtonLink href={`/performances/add?song=${song.id}`}>
-              Add Performance
-            </BoxedButtonLink>
+          {!neverBeenPlayedLive && (
+            <SignedInOnly>
+              <BoxedButtonLink href={`/performances/add?song=${song.id}`}>
+                Add Performance
+              </BoxedButtonLink>
+            </SignedInOnly>
           )}
-          {adminStatus && (
+          <AdminOnly>
             <BoxedButtonLink href={`/songs/${song.slug}/edit`}>
               Edit Song
             </BoxedButtonLink>
-          )}
+          </AdminOnly>
         </div>
       </div>
 
@@ -155,12 +170,14 @@ export default async function Song({ params }: Props) {
           </Suspense>
         )}
 
-        {songPerformances.length >= 2 && signedIn && (
-          <div className="flex justify-center">
-            <BoxedButtonLink href={`/rank?song=${song.slug}`}>
-              Vote on {song.title} performances
-            </BoxedButtonLink>
-          </div>
+        {songPerformances.length >= 2 && (
+          <SignedInOnly>
+            <div className="flex justify-center">
+              <BoxedButtonLink href={`/rank?song=${song.slug}`}>
+                Vote on {song.title} performances
+              </BoxedButtonLink>
+            </div>
+          </SignedInOnly>
         )}
 
         <div>

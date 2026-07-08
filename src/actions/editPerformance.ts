@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { and, ne } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 import z from "zod/v4";
@@ -113,10 +113,7 @@ export async function editPerformance(
 
   const performancePath = await getPerformancePath(updatedPerformance);
 
-  revalidatePath("/performances");
-  revalidatePath(`/songs/${songId}`);
-  revalidatePath(`/shows/${showId}`);
-  revalidatePath(performancePath);
+  updateTag("performances");
 
   return redirect(performancePath);
 }

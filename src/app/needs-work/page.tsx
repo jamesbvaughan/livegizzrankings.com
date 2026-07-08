@@ -12,8 +12,6 @@ export const metadata: Metadata = {
   description: "Database entries that need attention",
 };
 
-export const dynamic = "force-dynamic";
-
 const loadingFallback = <div className="text-muted">Loading...</div>;
 
 export default async function NeedsWorkPage() {

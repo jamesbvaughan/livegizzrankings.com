@@ -1,5 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import type { Route } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { db } from "./drizzle/db";
@@ -10,8 +11,20 @@ import { getPerformanceSlugBySongAndShow } from "./utils";
 // =============================================================================
 // SHOWS
 
+async function findShowById(showId: string) {
+  "use cache";
+  cacheTag("shows");
+  cacheLife("hours");
+
+  const result = await db.query.shows.findFirst({
+    where: eq(shows.id, showId),
+  });
+
+  return result;
+}
+
 export async function getShowById(showId: string) {
-  const show = await db.query.shows.findFirst({ where: eq(shows.id, showId) });
+  const show = await findShowById(showId);
   if (show == null) {
     notFound();
   }
@@ -19,10 +32,20 @@ export async function getShowById(showId: string) {
   return show;
 }
 
-export async function getShowBySlug(showSlug: string) {
-  const show = await db.query.shows.findFirst({
+async function findShowBySlug(showSlug: string) {
+  "use cache";
+  cacheTag("shows");
+  cacheLife("hours");
+
+  const result = await db.query.shows.findFirst({
     where: eq(shows.slug, showSlug),
   });
+
+  return result;
+}
+
+export async function getShowBySlug(showSlug: string) {
+  const show = await findShowBySlug(showSlug);
   if (show == null) {
     notFound();
   }
@@ -39,11 +62,21 @@ async function getPerformanceSlug(performance: Performance) {
   return getPerformanceSlugBySongAndShow(song, show);
 }
 
-export async function getPerformanceById(performanceId: string) {
-  const performance = await db.query.performances.findFirst({
+async function findPerformanceById(performanceId: string) {
+  "use cache";
+  cacheTag("performances");
+  cacheLife("hours");
+
+  const result = await db.query.performances.findFirst({
     where: eq(shows.id, performanceId),
     with: { song: true, show: true },
   });
+
+  return result;
+}
+
+export async function getPerformanceById(performanceId: string) {
+  const performance = await findPerformanceById(performanceId);
   if (performance == null) {
     notFound();
   }
@@ -51,9 +84,11 @@ export async function getPerformanceById(performanceId: string) {
   return performance;
 }
 
-export async function getPerformanceBySlug(
-  performanceSlug: string,
-): Promise<Performance & { show: Show }> {
+async function findPerformanceBySlug(performanceSlug: string) {
+  "use cache";
+  cacheTag("performances");
+  cacheLife("hours");
+
   const rows = await db
     .select({
       performance: performances,
@@ -66,7 +101,13 @@ export async function getPerformanceBySlug(
     .where(sql`(${songs.slug} || '-' || ${shows.slug}) = ${performanceSlug}`)
     .limit(1);
 
-  const row = rows[0];
+  return rows[0] ?? null;
+}
+
+export async function getPerformanceBySlug(
+  performanceSlug: string,
+): Promise<Performance & { show: Show }> {
+  const row = await findPerformanceBySlug(performanceSlug);
   if (row == null) {
     notFound();
   }
@@ -92,8 +133,20 @@ export async function getPerformancePath(
 // =============================================================================
 // SONGS
 
+async function findSongById(songId: string) {
+  "use cache";
+  cacheTag("songs");
+  cacheLife("hours");
+
+  const result = await db.query.songs.findFirst({
+    where: eq(shows.id, songId),
+  });
+
+  return result;
+}
+
 export async function getSongById(songId: string) {
-  const song = await db.query.songs.findFirst({ where: eq(shows.id, songId) });
+  const song = await findSongById(songId);
   if (song == null) {
     notFound();
   }
@@ -101,11 +154,21 @@ export async function getSongById(songId: string) {
   return song;
 }
 
-export async function getSongBySlug(songSlug: string) {
-  const song = await db.query.songs.findFirst({
+async function findSongBySlug(songSlug: string) {
+  "use cache";
+  cacheTag("songs");
+  cacheLife("hours");
+
+  const result = await db.query.songs.findFirst({
     where: eq(shows.slug, songSlug),
     with: { album: true },
   });
+
+  return result;
+}
+
+export async function getSongBySlug(songSlug: string) {
+  const song = await findSongBySlug(songSlug);
   if (song == null) {
     notFound();
   }
@@ -116,10 +179,20 @@ export async function getSongBySlug(songSlug: string) {
 // =============================================================================
 // ALBUMS
 
-export async function getAlbumBySlug(albumSlug: string) {
-  const album = await db.query.albums.findFirst({
+async function findAlbumBySlug(albumSlug: string) {
+  "use cache";
+  cacheTag("albums");
+  cacheLife("hours");
+
+  const result = await db.query.albums.findFirst({
     where: eq(shows.slug, albumSlug),
   });
+
+  return result;
+}
+
+export async function getAlbumBySlug(albumSlug: string) {
+  const album = await findAlbumBySlug(albumSlug);
   if (album == null) {
     notFound();
   }

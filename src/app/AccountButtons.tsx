@@ -2,24 +2,13 @@
 
 import { SignInButton, SignOutButton, useClerk, useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { Suspense, use, useCallback, useEffect, useState } from "react";
-
-function UnreviewedLogCount({
-  unreviewedLogCountPromise,
-}: {
-  unreviewedLogCountPromise: Promise<number | null>;
-}) {
-  const unreviewedLogCount = use(unreviewedLogCountPromise);
-  if (unreviewedLogCount != null && unreviewedLogCount > 0) {
-    return <> ({unreviewedLogCount})</>;
-  }
-  return null;
-}
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function AccountButtons({
-  unreviewedLogCountPromise,
+  unreviewedLogCountSlot,
 }: {
-  unreviewedLogCountPromise: Promise<number | null>;
+  unreviewedLogCountSlot: ReactNode;
 }) {
   const clerk = useClerk();
   const { isSignedIn, isLoaded, user } = useUser();
@@ -74,11 +63,7 @@ export function AccountButtons({
               <Link href="/votes">votes</Link>
               <Link href="/activity">
                 activity
-                <Suspense>
-                  <UnreviewedLogCount
-                    unreviewedLogCountPromise={unreviewedLogCountPromise}
-                  />
-                </Suspense>
+                {unreviewedLogCountSlot}
               </Link>
               <Link href="/needs-work">needs work</Link>
             </div>

@@ -1,4 +1,5 @@
 import { count, eq, lte } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,6 +10,10 @@ import { songsNeverPlayedLive } from "@/songsNeverPlayedLive";
 import { getAlbumPath, getSongPath } from "@/utils";
 
 async function getSongsWithNPerformancesForAlbum(albumId: string, n: number) {
+  "use cache";
+  cacheTag("songs", "performances");
+  cacheLife("hours");
+
   const performanceCount = count(performances.id);
 
   const rows = await db
@@ -74,12 +79,22 @@ async function AlbumWithMissingPerformances({
     </div>
   );
 }
+async function getAllAlbums() {
+  "use cache";
+  cacheTag("albums");
+  cacheLife("hours");
+
+  const result = await db.query.albums.findMany();
+
+  return result;
+}
+
 export async function SongsWithoutPerformances({
   performanceCount,
 }: {
   performanceCount: number;
 }) {
-  const allAlbums = await db.query.albums.findMany();
+  const allAlbums = await getAllAlbums();
   const albums = allAlbums.toSorted(
     (a, b) =>
       new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime(),

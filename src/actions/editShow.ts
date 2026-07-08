@@ -1,7 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 import z from "zod/v4";
@@ -120,8 +120,7 @@ export async function editShow(
 
   const showPath = getShowPath(updatedShow);
 
-  revalidatePath("/shows");
-  revalidatePath(showPath);
+  updateTag("shows");
 
   return redirect(showPath);
 }

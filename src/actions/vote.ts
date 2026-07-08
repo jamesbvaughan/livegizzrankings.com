@@ -1,19 +1,14 @@
 "use server";
 
 import { and, eq, or } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { zfd } from "zod-form-data";
 
 import { ensureSignedIn } from "@/auth/utils";
 
 import { db } from "../drizzle/db";
 import { performances, votes } from "../drizzle/schema";
-import {
-  getAlbumPath,
-  getPerformanceTitle,
-  getShowPath,
-  getSongPath,
-} from "../utils";
+import { getPerformanceTitle } from "../utils";
 
 const voteSchema = zfd.formData({
   performanceIdA: zfd.text(),
@@ -110,24 +105,14 @@ export async function vote(
     });
   });
 
-  const song = performanceA.song;
-  const songPath = getSongPath(song);
-  revalidatePath(songPath);
+  // Invalidate all cached vote and ranking data. `updateTag` (rather than
+  // `revalidateTag`) expires the caches immediately, so the voter sees their
+  // own vote reflected right away. "performances" covers everything that
+  // shows Elo ratings, which this vote just changed.
+  updateTag("votes");
+  updateTag("performances");
 
-  const showAPath = getShowPath(performanceA.show);
-  revalidatePath(showAPath);
-
-  const showBPath = getShowPath(performanceB.show);
-  revalidatePath(showBPath);
-
-  const albumPath = getAlbumPath(song.album);
-  revalidatePath(albumPath);
-
-  revalidatePath(`/`);
-  revalidatePath(`/songs`);
-  revalidatePath(`/votes`);
-
-  const performanceTitle = getPerformanceTitle(song, winner.show);
+  const performanceTitle = getPerformanceTitle(performanceA.song, winner.show);
 
   console.log(`New vote: User ${userId} voted for ${performanceTitle}!`);
 }

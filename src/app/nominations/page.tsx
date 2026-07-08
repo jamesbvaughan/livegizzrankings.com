@@ -183,11 +183,16 @@ function partitionNominations(allNominations: Nomination[]) {
 }
 
 export default async function NominationsPage() {
-  const [allNominations, adminStatus, songs, shows] = await Promise.all([
+  // Read auth state before any uncached queries: this marks the page as
+  // request-time-rendered, which the uncached nomination queries below
+  // require. (Nominations should stay fresh for their submitters rather than
+  // being cached.)
+  const adminStatus = await isAdmin();
+
+  const [allNominations, songs, shows] = await Promise.all([
     db.query.nominations.findMany({
       orderBy: desc(nominationsTable.createdAt),
     }),
-    isAdmin(),
     db.query.songs.findMany({
       with: {
         album: true,

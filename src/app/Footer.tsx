@@ -1,37 +1,53 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { and, count, eq, isNull } from "drizzle-orm";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";
 
 import { AccountButtons } from "./AccountButtons";
 
-async function getUnreviewedLogCount() {
+/**
+ * The number of activity log entries the current user hasn't reviewed yet,
+ * for admins' footers.
+ *
+ * This depends on the request's auth state, so it renders as a dynamic hole
+ * in the otherwise-prerendered page and streams in at request time.
+ */
+async function UnreviewedLogCount() {
+  // Deliberately not wrapped in a try/catch: during prerendering, this
+  // rejects to signal that rendering should be deferred to request time, and
+  // that rejection must propagate to React.
+  const user = await currentUser();
+  if (!user) {
+    return null;
+  }
+
   let unreviewedCount = null;
-
   try {
-    const user = await currentUser();
-    if (user) {
-      const [result] = await db
-        .select({ count: count() })
-        .from(activityLogs)
-        .leftJoin(
-          activityLogReviews,
-          and(
-            eq(activityLogs.id, activityLogReviews.activityLogId),
-            eq(activityLogReviews.userId, user.id),
-          ),
-        )
-        .where(isNull(activityLogReviews.id));
+    const [result] = await db
+      .select({ count: count() })
+      .from(activityLogs)
+      .leftJoin(
+        activityLogReviews,
+        and(
+          eq(activityLogs.id, activityLogReviews.activityLogId),
+          eq(activityLogReviews.userId, user.id),
+        ),
+      )
+      .where(isNull(activityLogReviews.id));
 
-      unreviewedCount = result?.count ?? null;
-    }
+    unreviewedCount = result?.count ?? null;
   } catch (error) {
     console.error("Error fetching unreviewed activity count:", error);
   }
 
-  return unreviewedCount;
+  if (unreviewedCount == null || unreviewedCount === 0) {
+    return null;
+  }
+
+  return <> ({unreviewedCount})</>;
 }
 
 function SiteButtons() {
@@ -71,8 +87,13 @@ function SiteButtons() {
   );
 }
 
+const unreviewedLogCountSlot = (
+  <Suspense fallback={null}>
+    <UnreviewedLogCount />
+  </Suspense>
+);
+
 export function Footer() {
-  const unreviewedLogCountPromise = getUnreviewedLogCount();
   return (
     <footer className="space-y-10">
       <hr className="border-red" />
@@ -80,7 +101,7 @@ export function Footer() {
       <div className="text-muted flex items-start justify-between space-x-2 leading-5">
         <SiteButtons />
 
-        <AccountButtons unreviewedLogCountPromise={unreviewedLogCountPromise} />
+        <AccountButtons unreviewedLogCountSlot={unreviewedLogCountSlot} />
       </div>
     </footer>
   );

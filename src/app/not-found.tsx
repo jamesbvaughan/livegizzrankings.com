@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
 const notFoundMessages: React.ReactNode[] = [
   "Searching... but there's nothing at this URL!",
@@ -27,19 +29,27 @@ const notFoundMessages: React.ReactNode[] = [
   </span>,
 ];
 
-// Force this page to be dynamic so that the error message is different each
-// time it loads.
-export const dynamic = "force-dynamic";
+// Render the message at request time so that it's different each time the
+// page loads. (`connection()` defers rendering past the prerendered shell.)
+async function RandomNotFoundMessage() {
+  await connection();
 
-export default function NotFound() {
   const message =
     notFoundMessages[Math.floor(Math.random() * notFoundMessages.length)];
 
+  return <p className="text-xl">{message}</p>;
+}
+
+const messageFallback = <p className="text-xl" />;
+
+export default function NotFound() {
   return (
     <div className="space-y-6">
       <h2 className="text-4xl">404</h2>
 
-      <p className="text-xl">{message}</p>
+      <Suspense fallback={messageFallback}>
+        <RandomNotFoundMessage />
+      </Suspense>
 
       <p>
         <Link href="/">Go back home</Link>

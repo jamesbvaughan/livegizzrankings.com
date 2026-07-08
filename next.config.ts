@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  cacheComponents: true,
   typedRoutes: true,
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   images: {

@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq, ne } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 
@@ -82,8 +82,7 @@ export async function editAlbum(
 
   const albumPath = getAlbumPath(updatedAlbum);
 
-  revalidatePath("/albums");
-  revalidatePath(albumPath);
+  updateTag("albums");
 
   return redirect(albumPath);
 }

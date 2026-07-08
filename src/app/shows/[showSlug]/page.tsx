@@ -1,11 +1,12 @@
 import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Suspense } from "react";
 
-import { isAdmin, isSignedIn } from "@/auth/utils";
+import { AdminOnly, SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { EloScore } from "@/components/EloScore";
 import { YouTubePlayer } from "@/components/MediaPlayers";
@@ -52,6 +53,11 @@ function rawHtml(html: string) {
 }
 
 async function GizzTapesNote({ show }: { show: Show }) {
+  "use cache";
+  // External content that changes rarely; refetched on the "hours" schedule
+  // rather than on every page load.
+  cacheLife("hours");
+
   const gizzTapesShowId = show.date;
 
   let note;
@@ -96,6 +102,10 @@ async function GizzTapesNote({ show }: { show: Show }) {
 }
 
 async function PerformanceElo({ performanceId }: { performanceId: string }) {
+  "use cache";
+  cacheTag("performances");
+  cacheLife("hours");
+
   const performance = await db.query.performances.findFirst({
     where: eq(performances.id, performanceId),
   });
@@ -106,16 +116,14 @@ async function PerformanceElo({ performanceId }: { performanceId: string }) {
   return <EloScore score={performance.eloRating} />;
 }
 
-export default async function ShowPage({ params }: Props) {
-  const { showSlug } = await params;
-  const [show, adminStatus, signedIn] = await Promise.all([
-    getShowBySlug(showSlug),
-    isAdmin(),
-    isSignedIn(),
-  ]);
-  const [showPerformances, videos] = await Promise.all([
+async function getShowPageData(showId: string) {
+  "use cache";
+  cacheTag("performances", "songs", "albums", "shows");
+  cacheLife("hours");
+
+  const result = await Promise.all([
     db.query.performances.findMany({
-      where: eq(performances.showId, show.id),
+      where: eq(performances.showId, showId),
       orderBy: asc(performances.showPosition),
       with: {
         song: {
@@ -126,9 +134,17 @@ export default async function ShowPage({ params }: Props) {
       },
     }),
     db.query.showVideos.findMany({
-      where: eq(showVideos.showId, show.id),
+      where: eq(showVideos.showId, showId),
     }),
   ]);
+
+  return result;
+}
+
+export default async function ShowPage({ params }: Props) {
+  const { showSlug } = await params;
+  const show = await getShowBySlug(showSlug);
+  const [showPerformances, videos] = await getShowPageData(show.id);
 
   const showTitle = getShowTitle(show);
 
@@ -147,16 +163,16 @@ export default async function ShowPage({ params }: Props) {
       <div className="flex items-center justify-between">
         <PageTitle>{showTitle}</PageTitle>
         <div className="flex gap-2">
-          {signedIn && (
+          <SignedInOnly>
             <BoxedButtonLink href={`/performances/add?show=${show.id}`}>
               Add Performance
             </BoxedButtonLink>
-          )}
-          {adminStatus && (
+          </SignedInOnly>
+          <AdminOnly>
             <BoxedButtonLink href={`/shows/${show.slug}/edit`}>
               Edit Show
             </BoxedButtonLink>
-          )}
+          </AdminOnly>
         </div>
       </div>
 

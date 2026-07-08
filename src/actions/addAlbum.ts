@@ -1,7 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 
@@ -67,7 +67,7 @@ export async function addAlbum(
     details: `Title: ${title}`,
   });
 
-  revalidatePath("/albums");
+  updateTag("albums");
 
   const albumPath = getAlbumPath(newAlbum);
   return redirect(albumPath);

@@ -21,8 +21,6 @@ export function generateStaticParams() {
   }));
 }
 
-export const dynamicParams = false;
-
 interface Params {
   slug: string;
 }

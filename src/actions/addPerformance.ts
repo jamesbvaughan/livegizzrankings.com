@@ -1,7 +1,7 @@
 "use server";
 
 import { eq, and } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 import z from "zod/v4";
@@ -101,9 +101,7 @@ export async function addPerformance(
     details: `Song: ${songId}, Show: ${showId}`,
   });
 
-  revalidatePath("/performances");
-  revalidatePath(`/songs/${songId}`);
-  revalidatePath(`/shows/${showId}`);
+  updateTag("performances");
 
   // Revalidate nominations page if a nomination was linked
   if (nominationId) {

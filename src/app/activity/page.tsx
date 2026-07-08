@@ -28,8 +28,6 @@ export const metadata: Metadata = {
   description: "View recent activity on Live Gizz Rankings.",
 };
 
-export const dynamic = "force-dynamic";
-
 const filterToggleFallback = <div className="h-9 w-40" />;
 
 async function getEntityInfo(entityType: string, entityId: string) {

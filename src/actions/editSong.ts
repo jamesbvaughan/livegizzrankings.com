@@ -1,7 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { zfd } from "zod-form-data";
 
@@ -80,9 +80,7 @@ export async function editSong(
 
   const songPath = getSongPath(updatedSong);
 
-  revalidatePath("/songs");
-  revalidatePath(`/albums/${albumId}`);
-  revalidatePath(songPath);
+  updateTag("songs");
 
   return redirect(songPath);
 }
