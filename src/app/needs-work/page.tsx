@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+const loadingFallback = <div className="text-muted">Loading...</div>;
+
 export default async function NeedsWorkPage() {
   await ensureAdmin();
 
@@ -25,11 +27,11 @@ export default async function NeedsWorkPage() {
           Database entries that need attention or cleanup
         </p>
 
-        <Suspense fallback={<div className="text-muted">Loading...</div>}>
+        <Suspense fallback={loadingFallback}>
           <InvalidBandcampIds />
         </Suspense>
 
-        <Suspense fallback={<div className="text-muted">Loading...</div>}>
+        <Suspense fallback={loadingFallback}>
           <MissingBandcampTrackIds />
         </Suspense>
       </PageContent>

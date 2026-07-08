@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback, useState } from "react";
 import { BoxedInput } from "./BoxedInput";
 import { BoxedButton } from "./BoxedButtonLink";
 import { extractYouTubeVideoId } from "@/lib/extractEmbedCodes";
@@ -18,6 +19,24 @@ interface VideoRowProps {
 }
 
 function VideoRow({ video, index, onUpdate, onRemove }: VideoRowProps) {
+  const handleTitleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onUpdate(index, "title", e.target.value);
+    },
+    [index, onUpdate],
+  );
+
+  const handleVideoIdChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onUpdate(index, "youtubeVideoId", extractYouTubeVideoId(e.target.value));
+    },
+    [index, onUpdate],
+  );
+
+  const handleRemove = useCallback(() => {
+    onRemove(index);
+  }, [index, onRemove]);
+
   return (
     <div className="flex gap-2">
       <div className="flex-1">
@@ -27,9 +46,7 @@ function VideoRow({ video, index, onUpdate, onRemove }: VideoRowProps) {
           name={`video-title-${index}`}
           type="text"
           value={video.title}
-          onChange={(e) => {
-            onUpdate(index, "title", e.target.value);
-          }}
+          onChange={handleTitleChange}
           placeholder="e.g. Night 1"
           required={video.youtubeVideoId !== ""}
         />
@@ -41,21 +58,13 @@ function VideoRow({ video, index, onUpdate, onRemove }: VideoRowProps) {
           name={`video-id-${index}`}
           type="text"
           value={video.youtubeVideoId}
-          onChange={(e) => {
-            const extractedId = extractYouTubeVideoId(e.target.value);
-            onUpdate(index, "youtubeVideoId", extractedId);
-          }}
+          onChange={handleVideoIdChange}
           placeholder="e.g. https://youtube.com/watch?v=dQw4w9WgXcQ"
           required={video.title !== ""}
         />
       </div>
       <div className="flex items-end">
-        <BoxedButton
-          type="button"
-          onClick={() => {
-            onRemove(index);
-          }}
-        >
+        <BoxedButton type="button" onClick={handleRemove}>
           Remove
         </BoxedButton>
       </div>
@@ -76,19 +85,24 @@ export function ShowVideoList({
     defaultVideos.length > 0 ? defaultVideos : [],
   );
 
-  const addVideo = () => {
-    setVideos([...videos, { youtubeVideoId: "", title: "" }]);
-  };
+  const addVideo = useCallback(() => {
+    setVideos((prev) => [...prev, { youtubeVideoId: "", title: "" }]);
+  }, []);
 
-  const removeVideo = (index: number) => {
-    setVideos(videos.filter((_, i) => i !== index));
-  };
+  const removeVideo = useCallback((index: number) => {
+    setVideos((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const updateVideo = (index: number, field: keyof Video, value: string) => {
-    const newVideos = [...videos];
-    newVideos[index][field] = value;
-    setVideos(newVideos);
-  };
+  const updateVideo = useCallback(
+    (index: number, field: keyof Video, value: string) => {
+      setVideos((prev) => {
+        const newVideos = [...prev];
+        newVideos[index] = { ...newVideos[index], [field]: value };
+        return newVideos;
+      });
+    },
+    [],
+  );
 
   return (
     <div className="space-y-4">

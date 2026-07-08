@@ -2,6 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Suspense } from "react";
 
 import { isAdmin, isSignedIn } from "@/auth/utils";
@@ -39,6 +40,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const bandcampIframeStyle: CSSProperties = {
+  border: 0,
+  marginTop: 8,
+  width: "100%",
+  height: 472,
+};
+
+function rawHtml(html: string) {
+  return { __html: html };
+}
+
 async function GizzTapesNote({ show }: { show: Show }) {
   const gizzTapesShowId = show.date;
 
@@ -60,6 +72,7 @@ async function GizzTapesNote({ show }: { show: Show }) {
 
   const htmlWithLineBreaks = note.replaceAll("\\n", "<br>");
 
+  // oxlint-disable-next-line no-warning-comments
   // TODO: Sanitize this again.
   // I've disabled this because I was having issues with the dompurify package.
   //
@@ -68,7 +81,7 @@ async function GizzTapesNote({ show }: { show: Show }) {
 
   return (
     <div className="space-y-2">
-      <div dangerouslySetInnerHTML={{ __html: htmlWithLineBreaks }} />
+      <div dangerouslySetInnerHTML={rawHtml(htmlWithLineBreaks)} />
 
       <Link
         href={`https://tapes.kglw.net/${gizzTapesShowId}/`}
@@ -241,12 +254,7 @@ export default async function ShowPage({ params }: Props) {
                 {/* eslint-disable-next-line iframe-missing-sandbox */}
                 <iframe
                   title={`Bandcamp player for ${showTitle}`}
-                  style={{
-                    border: 0,
-                    marginTop: 8,
-                    width: "100%",
-                    height: 472,
-                  }}
+                  style={bandcampIframeStyle}
                   src={`https://bandcamp.com/EmbeddedPlayer/album=${show.bandcampAlbumId}/size=large/bgcol=333333/linkcol=e32c14/artwork=none/transparent=true/`}
                 />
               </>

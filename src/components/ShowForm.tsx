@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useActionState, useCallback, useMemo, useState } from "react";
 
 import type { Show, ShowVideo } from "@/drizzle/schema";
 
@@ -33,6 +34,22 @@ export default function ShowForm({
 
   const [bandcampAlbumId, setBandcampAlbumId] = useState(
     getFormValue(formData, "bandcampAlbumId") ?? show?.bandcampAlbumId ?? "",
+  );
+
+  const handleBandcampAlbumIdChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setBandcampAlbumId(extractBandcampAlbumId(e.target.value));
+    },
+    [],
+  );
+
+  const defaultVideos = useMemo(
+    () =>
+      videos.map((v) => ({
+        youtubeVideoId: v.youtubeVideoId,
+        title: v.title,
+      })),
+    [videos],
   );
 
   return (
@@ -100,21 +117,13 @@ export default function ShowForm({
         type="text"
         pattern="^\d+$"
         value={bandcampAlbumId}
-        onChange={(e) => {
-          const extractedId = extractBandcampAlbumId(e.target.value);
-          setBandcampAlbumId(extractedId);
-        }}
+        onChange={handleBandcampAlbumIdChange}
         placeholder="e.g., 1234567890 or paste embed code"
         helpText="Paste the Bandcamp album ID or the full embed code (either format) and the album ID will be extracted automatically."
         errorMessage="Bandcamp Album ID must contain only digits"
       />
 
-      <ShowVideoList
-        defaultVideos={videos.map((v) => ({
-          youtubeVideoId: v.youtubeVideoId,
-          title: v.title,
-        }))}
-      />
+      <ShowVideoList defaultVideos={defaultVideos} />
 
       <div className="flex gap-4">
         <BoxedButton type="submit" disabled={pending}>

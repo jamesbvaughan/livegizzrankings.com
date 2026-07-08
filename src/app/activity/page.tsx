@@ -29,6 +29,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+const filterToggleFallback = <div className="h-9 w-40" />;
+
 async function getEntityInfo(entityType: string, entityId: string) {
   try {
     switch (entityType) {
@@ -335,7 +337,7 @@ export default async function ActivityPage({
               ? `Showing all activity (${filteredLogs.length} entries)`
               : `Showing unreviewed activity (${filteredLogs.length} entries)`}
           </p>
-          <Suspense fallback={<div className="h-9 w-40" />}>
+          <Suspense fallback={filterToggleFallback}>
             <FilterToggle />
           </Suspense>
         </div>
