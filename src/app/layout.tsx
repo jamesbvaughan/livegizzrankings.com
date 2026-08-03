@@ -19,6 +19,7 @@ const description =
   "Find the best live version of King Gizzard songs. Vote on your favorites and browse rankings based on the community's votes.";
 
 export const metadata: Metadata = {
+  metadataBase: "https://livegizzrankings.com",
   title: {
     template: `%s | ${title}`,
     default: title,
