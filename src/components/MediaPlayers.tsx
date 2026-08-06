@@ -1,3 +1,5 @@
+/* oxlint-disable iframe-missing-sandbox */
+
 import { YouTubeEmbed } from "@next/third-parties/google";
 import Link from "next/link";
 
@@ -5,7 +7,6 @@ import type { Performance, Show } from "@/drizzle/schema";
 
 function SpotifyPlayer({ spotifyTrackId }: { spotifyTrackId: string }) {
   return (
-    // eslint-disable-next-line iframe-missing-sandbox
     <iframe
       title="Spotify player"
       className="rounded-xl"
@@ -14,6 +15,31 @@ function SpotifyPlayer({ spotifyTrackId }: { spotifyTrackId: string }) {
       src={`https://open.spotify.com/embed/track/${spotifyTrackId}`}
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       loading="lazy"
+    />
+  );
+}
+
+function AppleMusicPlayer({
+  appleMusicEmbedPath,
+}: {
+  appleMusicEmbedPath: string;
+}) {
+  const embedUrl = new URL(
+    `https://embed.music.apple.com/${appleMusicEmbedPath}`,
+  );
+  embedUrl.searchParams.set("theme", "dark");
+  return (
+    <iframe
+      className="rounded-xl"
+      title="Apple Music player"
+      allow="autoplay *; encrypted-media *;"
+      height="150"
+      style={{
+        width: "100%",
+        overflow: "hidden",
+        background: "transparent",
+      }}
+      src={embedUrl.toString()}
     />
   );
 }
@@ -28,7 +54,6 @@ function BandcampPlayer({
   const bgColor = "000000";
   const linkColor = "ff0000";
   return (
-    // eslint-disable-next-line iframe-missing-sandbox
     <iframe
       title="Bandcamp player"
       width="100%"
@@ -80,6 +105,8 @@ export function MediaPlayers({
       {performance.spotifyTrackId && enableSpotify && (
         <SpotifyPlayer spotifyTrackId={performance.spotifyTrackId} />
       )}
+
+      <AppleMusicPlayer appleMusicEmbedPath="us/album/sense-live-at-remlinger-farms-23/1842165744?i=1842166110" />
 
       <Link
         className="inline-block"
