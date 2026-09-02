@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ia801002.us.archive.org",
       },
+      {
+        protocol: "https",
+        hostname: "i.songfishapp.com",
+      },
     ],
   },
   // eslint-disable-next-line require-await
