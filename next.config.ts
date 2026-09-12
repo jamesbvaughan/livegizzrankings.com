@@ -150,6 +150,9 @@ const frameSources = [
   "https://www.youtube.com",
   "https://www.youtube-nocookie.com",
 
+  // Apple Music embeds
+  "https://embed.music.apple.com",
+
   // Vercel toolbar
   "https://vercel.live",
 ];

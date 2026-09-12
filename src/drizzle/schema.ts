@@ -81,6 +81,7 @@ export const performances = pgTable(
       .references(() => shows.id),
     spotifyTrackId: text("spotify_track_id").unique(),
     bandcampTrackId: text("bandcamp_track_id").unique(),
+    appleMusicEmbedPath: text("apple_music_embed_path").unique(),
     showPosition: integer("show_position").notNull(),
     youtubeVideoId: text("youtube_video_id"),
     youtubeVideoStartTime: integer("youtube_video_start_time"),
