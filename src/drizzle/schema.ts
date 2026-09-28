@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -9,6 +9,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -107,21 +108,33 @@ export const performancesRelations = relations(performances, ({ one }) => ({
   }),
 }));
 
-export const votes = pgTable("votes", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  performance1Id: uuid("performance_1_id")
-    .notNull()
-    .references(() => performances.id),
-  performance2Id: uuid("performance_2_id")
-    .notNull()
-    .references(() => performances.id),
-  winnerId: uuid("winner_id")
-    .notNull()
-    .references(() => performances.id),
-  // References the Clerk user ID
-  voterId: text("voter_id").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const votes = pgTable(
+  "votes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    performance1Id: uuid("performance_1_id")
+      .notNull()
+      .references(() => performances.id),
+    performance2Id: uuid("performance_2_id")
+      .notNull()
+      .references(() => performances.id),
+    winnerId: uuid("winner_id")
+      .notNull()
+      .references(() => performances.id),
+    // References the Clerk user ID
+    voterId: text("voter_id").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    // One vote per voter per pair, regardless of which side each performance
+    // was on.
+    uniqueIndex("votes_voter_pair_unique").on(
+      t.voterId,
+      sql`least(${t.performance1Id}, ${t.performance2Id})`,
+      sql`greatest(${t.performance1Id}, ${t.performance2Id})`,
+    ),
+  ],
+);
 
 export const votesRelations = relations(votes, ({ one }) => ({
   performance1: one(performances, {

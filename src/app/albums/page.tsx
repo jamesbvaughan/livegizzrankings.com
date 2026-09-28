@@ -23,7 +23,7 @@ async function AlbumList() {
 
   const albumsByYear = Object.entries(
     Object.groupBy(allAlbums, (album) =>
-      new Date(album.releaseDate).getFullYear(),
+      new Date(album.releaseDate).getUTCFullYear(),
     ),
   ).toSorted(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA));
 

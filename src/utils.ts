@@ -6,8 +6,11 @@ import type { Album, Show, Song } from "./drizzle/schema";
 // SHOWS
 
 export function getShowTitle(show: Show) {
+  // `show.date` is a "YYYY-MM-DD" string, which parses as midnight UTC. Read
+  // the year in UTC too, so it doesn't shift to the previous year in time
+  // zones behind UTC.
   const date = new Date(show.date);
-  const year = date.getFullYear() % 100;
+  const year = date.getUTCFullYear() % 100;
   return `${show.location} '${year.toString()}`;
 }
 

@@ -56,7 +56,10 @@ export default function NominationEditForm({
         {performances.map((performance) => (
           <option key={performance.id} value={performance.id}>
             {performance.song.title} - {performance.show.location} (
-            {new Date(performance.show.date).toLocaleDateString()})
+            {new Date(performance.show.date).toLocaleDateString(undefined, {
+              timeZone: "UTC",
+            })}
+            )
           </option>
         ))}
       </BoxedSelect>

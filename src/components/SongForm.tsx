@@ -86,7 +86,7 @@ export default function SongForm({
         <option value="">Select an album...</option>
         {sortedAlbums.map((album) => (
           <option key={album.id} value={album.id}>
-            {album.title} ({new Date(album.releaseDate).getFullYear()})
+            {album.title} ({new Date(album.releaseDate).getUTCFullYear()})
           </option>
         ))}
       </BoxedSelect>

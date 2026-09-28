@@ -160,7 +160,7 @@ export default function PerformanceForm({
         {sortedAlbumGroups.map((albumGroup) => (
           <optgroup
             key={albumGroup.album.id}
-            label={`${albumGroup.album.title} (${new Date(albumGroup.album.releaseDate).getFullYear()})`}
+            label={`${albumGroup.album.title} (${new Date(albumGroup.album.releaseDate).getUTCFullYear()})`}
           >
             {albumGroup.songs.map((song) => (
               <option key={song.id} value={song.id}>
@@ -192,7 +192,10 @@ export default function PerformanceForm({
         <option value="">Select a show...</option>
         {sortedShows.map((show) => (
           <option key={show.id} value={show.id}>
-            {show.location} - {new Date(show.date).toLocaleDateString()}
+            {show.location} -{" "}
+            {new Date(show.date).toLocaleDateString(undefined, {
+              timeZone: "UTC",
+            })}
           </option>
         ))}
       </BoxedSelect>

@@ -1,16 +1,15 @@
 "use client";
 
 import { SignInButton, SignOutButton, useClerk, useUser } from "@clerk/nextjs";
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { useCallback } from "react";
 
 import { useIsClient } from "@/lib/useIsClient";
 
 export function AccountButtons({
-  unreviewedLogCountSlot,
+  adminLinksSlot,
 }: {
-  unreviewedLogCountSlot: ReactNode;
+  adminLinksSlot: ReactNode;
 }) {
   const clerk = useClerk();
   const { isSignedIn, isLoaded, user } = useUser();
@@ -32,7 +31,6 @@ export function AccountButtons({
     );
   }
 
-  const isAdmin = user.publicMetadata.isAdmin;
   const username = user.username ?? user.primaryEmailAddress?.emailAddress;
 
   return (
@@ -52,21 +50,7 @@ export function AccountButtons({
           </SignOutButton>
         </div>
 
-        {isAdmin ? (
-          <>
-            <hr className="border-muted-2 w-full" />
-
-            <div className="flex flex-col items-end space-y-1">
-              <Link href="/users">users</Link>
-              <Link href="/votes">votes</Link>
-              <Link href="/activity">
-                activity
-                {unreviewedLogCountSlot}
-              </Link>
-              <Link href="/needs-work">needs work</Link>
-            </div>
-          </>
-        ) : null}
+        {adminLinksSlot}
       </div>
     </div>
   );

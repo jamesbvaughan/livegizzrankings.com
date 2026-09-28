@@ -1,23 +1,17 @@
-import { currentUser } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
-import { forbidden, unauthorized } from "next/navigation";
 
+import { ensureAdmin } from "@/auth/utils";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
 import type { ActivityLog, Nomination, Vote } from "@/drizzle/schema";
 import { getUserDisplayNames } from "@/lib/users";
 
-import { allPairs } from "../rank/getRandomPair";
+import { getPairCount } from "../rank/getRandomPair";
 import UsersTable from "./users-table";
 
 export const metadata: Metadata = {
   title: "Users",
 };
-
-const nPairs = Object.values(allPairs).reduce(
-  (acc, pairsForSong) => acc + pairsForSong.length,
-  0,
-);
 
 function buildTableData(
   users: [string, Vote[] | undefined][],
@@ -52,21 +46,16 @@ function buildTableData(
 }
 
 export default async function UsersPage() {
-  const user = await currentUser();
-  if (!user) {
-    unauthorized();
-  }
+  await ensureAdmin();
 
-  const isAdmin = user.publicMetadata.isAdmin;
-  if (!isAdmin) {
-    forbidden();
-  }
-
-  const [allVotes, allNominations, allActivityLogs] = await Promise.all([
-    db.query.votes.findMany(),
-    db.query.nominations.findMany(),
-    db.query.activityLogs.findMany(),
-  ]);
+  const [allVotes, allNominations, allActivityLogs, nPairs] = await Promise.all(
+    [
+      db.query.votes.findMany(),
+      db.query.nominations.findMany(),
+      db.query.activityLogs.findMany(),
+      getPairCount(),
+    ],
+  );
 
   const userToVotes = Object.groupBy(allVotes, (vote) => vote.voterId);
 

@@ -1,8 +1,9 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { and, count, eq, isNull } from "drizzle-orm";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { authWithSentry } from "@/auth/utils";
+import { AdminOnly } from "@/components/authGates";
 import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";
 
@@ -19,8 +20,8 @@ async function UnreviewedLogCount() {
   // Deliberately not wrapped in a try/catch: during prerendering, this
   // rejects to signal that rendering should be deferred to request time, and
   // that rejection must propagate to React.
-  const user = await currentUser();
-  if (!user) {
+  const { userId } = await authWithSentry();
+  if (!userId) {
     return null;
   }
 
@@ -33,7 +34,7 @@ async function UnreviewedLogCount() {
         activityLogReviews,
         and(
           eq(activityLogs.id, activityLogReviews.activityLogId),
-          eq(activityLogReviews.userId, user.id),
+          eq(activityLogReviews.userId, userId),
         ),
       )
       .where(isNull(activityLogReviews.id));
@@ -87,10 +88,22 @@ function SiteButtons() {
   );
 }
 
-const unreviewedLogCountSlot = (
-  <Suspense fallback={null}>
-    <UnreviewedLogCount />
-  </Suspense>
+const adminLinksSlot = (
+  <AdminOnly>
+    <hr className="border-muted-2 w-full" />
+
+    <div className="flex flex-col items-end space-y-1">
+      <Link href="/users">users</Link>
+      <Link href="/votes">votes</Link>
+      <Link href="/activity">
+        activity
+        <Suspense fallback={null}>
+          <UnreviewedLogCount />
+        </Suspense>
+      </Link>
+      <Link href="/needs-work">needs work</Link>
+    </div>
+  </AdminOnly>
 );
 
 export function Footer() {
@@ -101,7 +114,7 @@ export function Footer() {
       <div className="text-muted flex items-start justify-between space-x-2 leading-5">
         <SiteButtons />
 
-        <AccountButtons unreviewedLogCountSlot={unreviewedLogCountSlot} />
+        <AccountButtons adminLinksSlot={adminLinksSlot} />
       </div>
     </footer>
   );

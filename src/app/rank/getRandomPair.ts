@@ -4,24 +4,66 @@ import { ensureSignedIn } from "@/auth/utils";
 import { db } from "@/drizzle/db";
 import { skippedPairs, votes } from "@/drizzle/schema";
 
-async function generateAllPotentialPairs() {
-  const pairs: Record<string, [string, string][]> = {};
-  const allSongs = await db.query.songs.findMany();
-  const allPerformances = await db.query.performances.findMany();
+type Pair = [string, string];
 
-  for (const song of allSongs) {
-    pairs[song.id] = [];
-    const performances = allPerformances.filter(
-      (performance) => performance.songId === song.id,
-    );
+/**
+ * Every potential pair of performances, grouped by song ID.
+ */
+function generateAllPotentialPairs(
+  allPerformances: { id: string; songId: string }[],
+) {
+  const performancesBySong = Map.groupBy(
+    allPerformances,
+    (performance) => performance.songId,
+  );
+
+  const pairs: Record<string, Pair[]> = {};
+  for (const [songId, performances] of performancesBySong) {
+    pairs[songId] = [];
     for (let i = 0; i < performances.length; i++) {
       for (let j = i + 1; j < performances.length; j++) {
-        pairs[song.id].push([performances[i].id, performances[j].id]);
+        pairs[songId].push([performances[i].id, performances[j].id]);
       }
     }
   }
 
   return pairs;
+}
+
+/**
+ * A key identifying a pair of performances regardless of their order.
+ */
+function pairKey(performanceIdA: string, performanceIdB: string) {
+  return performanceIdA < performanceIdB
+    ? `${performanceIdA},${performanceIdB}`
+    : `${performanceIdB},${performanceIdA}`;
+}
+
+function getAllPerformanceSongIds() {
+  return db.query.performances.findMany({
+    columns: {
+      id: true,
+      songId: true,
+    },
+  });
+}
+
+/**
+ * The total number of pairs of performances available to vote on.
+ */
+export async function getPairCount() {
+  const allPerformances = await getAllPerformanceSongIds();
+  const performancesBySong = Map.groupBy(
+    allPerformances,
+    (performance) => performance.songId,
+  );
+
+  let count = 0;
+  for (const performances of performancesBySong.values()) {
+    count += (performances.length * (performances.length - 1)) / 2;
+  }
+
+  return count;
 }
 
 async function getUserPairs() {
@@ -60,24 +102,14 @@ async function getUserSkippedPairs() {
  */
 const SHOW_ALL_PAIRS = false;
 
-/**
- * Every potential pair of performances.
- */
-export const allPairs = await generateAllPotentialPairs();
-
 export async function getRandomPairForCurrentUser(filterSongId?: string) {
   // Get all of the pairs of performances that the current user has already
   // voted on or skipped.
   const userPairs = await getUserPairs();
   const userSkippedPairs = await getUserSkippedPairs();
 
-  // Fetch all performances to map performance IDs to song IDs
-  const allPerformances = await db.query.performances.findMany({
-    columns: {
-      id: true,
-      songId: true,
-    },
-  });
+  const allPerformances = await getAllPerformanceSongIds();
+  const allPairs = generateAllPotentialPairs(allPerformances);
 
   const performanceToSongMap = new Map<string, string>();
   for (const perf of allPerformances) {
@@ -106,9 +138,20 @@ export async function getRandomPairForCurrentUser(filterSongId?: string) {
     );
   }
 
+  // Every pair the user has already voted on or skipped, for constant-time
+  // lookups below.
+  const seenPairKeys = new Set([
+    ...userPairs.map((pair) =>
+      pairKey(pair.performance1Id, pair.performance2Id),
+    ),
+    ...userSkippedPairs.map((pair) =>
+      pairKey(pair.performanceAId, pair.performanceBId),
+    ),
+  ]);
+
   // Build up a record of every pair of performances that the current user has
   // not already voted on or skipped.
-  const unvotedPairs: Record<string, [string, string][]> = {};
+  const unvotedPairs: Record<string, Pair[]> = {};
   const songIdsToCheck = filterSongId ? [filterSongId] : Object.keys(allPairs);
 
   for (const songId of songIdsToCheck) {
@@ -117,21 +160,7 @@ export async function getRandomPairForCurrentUser(filterSongId?: string) {
     }
 
     for (const pair of allPairs[songId]) {
-      const userHasVoted = userPairs.some(
-        (userPair) =>
-          (userPair.performance1Id === pair[0] &&
-            userPair.performance2Id === pair[1]) ||
-          (userPair.performance1Id === pair[1] &&
-            userPair.performance2Id === pair[0]),
-      );
-      const userHasSkipped = userSkippedPairs.some(
-        (skippedPair) =>
-          (skippedPair.performanceAId === pair[0] &&
-            skippedPair.performanceBId === pair[1]) ||
-          (skippedPair.performanceAId === pair[1] &&
-            skippedPair.performanceBId === pair[0]),
-      );
-      if ((!userHasVoted && !userHasSkipped) || SHOW_ALL_PAIRS) {
+      if (!seenPairKeys.has(pairKey(pair[0], pair[1])) || SHOW_ALL_PAIRS) {
         unvotedPairs[songId] ??= [];
         unvotedPairs[songId].push(pair);
       }
@@ -187,9 +216,7 @@ export async function getRandomPairForCurrentUser(filterSongId?: string) {
     }
 
     // Tiebreaker: lexicographic sort of concatenated sorted IDs
-    const aKey = [a[0], a[1]].toSorted().join(",");
-    const bKey = [b[0], b[1]].toSorted().join(",");
-    return aKey.localeCompare(bKey);
+    return pairKey(a[0], a[1]).localeCompare(pairKey(b[0], b[1]));
   });
 
   return sortedPairs[0];

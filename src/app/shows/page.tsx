@@ -25,7 +25,7 @@ async function ShowList() {
   const showsByYear: Record<string, Show[]> = {};
 
   for (const show of allShows) {
-    const year = new Date(show.date).getFullYear().toString();
+    const year = new Date(show.date).getUTCFullYear().toString();
     showsByYear[year] ??= [];
     showsByYear[year].push(show);
   }

@@ -112,7 +112,7 @@ export function parseNomination(
         // If we have a year, check if it matches
         let yearScore = 0;
         if (potentialYear) {
-          const showYear = new Date(show.date).getFullYear();
+          const showYear = new Date(show.date).getUTCFullYear();
           if (showYear === potentialYear) {
             // Perfect year match
             yearScore = 1.0;

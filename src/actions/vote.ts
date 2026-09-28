@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, or } from "drizzle-orm";
+import { and, asc, eq, inArray, or } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
 import { zfd } from "zod-form-data";
 
@@ -16,16 +16,10 @@ const voteSchema = zfd.formData({
   winnerId: zfd.text(),
 });
 
-async function getPerformance(performanceId: string) {
-  const performance = await db.query.performances.findFirst({
-    where: eq(performances.id, performanceId),
-    with: { song: { with: { album: true } }, show: true },
-  });
-  if (!performance) {
-    throw new Error("Performance not found");
-  }
+const K_FACTOR = 32;
 
-  return performance;
+function expectedScore(rating: number, opponentRating: number) {
+  return 1 / (1 + Math.pow(10, (opponentRating - rating) / 400));
 }
 
 export async function vote(
@@ -39,71 +33,105 @@ export async function vote(
   const { performanceIdA, performanceIdB, winnerId } =
     voteSchema.parse(formData);
 
-  const existingVote = await db.query.votes.findFirst({
-    where: and(
-      eq(votes.voterId, userId),
-      or(
-        and(
-          eq(votes.performance1Id, performanceIdA),
-          eq(votes.performance2Id, performanceIdB),
-        ),
-        and(
-          eq(votes.performance1Id, performanceIdB),
-          eq(votes.performance2Id, performanceIdA),
+  if (performanceIdA === performanceIdB) {
+    throw new Error("Can't vote on a performance against itself");
+  }
+  if (winnerId !== performanceIdA && winnerId !== performanceIdB) {
+    throw new Error("The winner must be one of the two performances");
+  }
+
+  const didVote = await db.transaction(async (tx) => {
+    // Lock both performance rows for the rest of the transaction, so that a
+    // concurrent vote involving either performance waits for this one to
+    // commit instead of computing its new rating from a stale one. Locking in
+    // a consistent order avoids deadlocks between concurrent votes.
+    const lockedPerformances = await tx
+      .select({
+        id: performances.id,
+        songId: performances.songId,
+        eloRating: performances.eloRating,
+      })
+      .from(performances)
+      .where(inArray(performances.id, [performanceIdA, performanceIdB]))
+      .orderBy(asc(performances.id))
+      .for("update");
+
+    const performanceA = lockedPerformances.find(
+      (performance) => performance.id === performanceIdA,
+    );
+    const performanceB = lockedPerformances.find(
+      (performance) => performance.id === performanceIdB,
+    );
+    if (!performanceA || !performanceB) {
+      throw new Error("Performance not found");
+    }
+
+    if (performanceA.songId !== performanceB.songId) {
+      throw new Error("Performances must be for the same song");
+    }
+
+    // Checked while holding the locks, so a concurrent duplicate submission
+    // sees this vote once it's committed.
+    const existingVote = await tx.query.votes.findFirst({
+      where: and(
+        eq(votes.voterId, userId),
+        or(
+          and(
+            eq(votes.performance1Id, performanceIdA),
+            eq(votes.performance2Id, performanceIdB),
+          ),
+          and(
+            eq(votes.performance1Id, performanceIdB),
+            eq(votes.performance2Id, performanceIdA),
+          ),
         ),
       ),
-    ),
-  });
-  if (existingVote) {
-    console.log(
-      `Skipping vote from user ${userId} because they've already voted on these performances`,
+      columns: { id: true },
+    });
+    if (existingVote) {
+      console.log(
+        `Skipping vote from user ${userId} because they've already voted on these performances`,
+      );
+      return false;
+    }
+
+    const scoreA = performanceA.id === winnerId ? 1 : 0;
+    const scoreB = performanceB.id === winnerId ? 1 : 0;
+
+    const expectedA = expectedScore(
+      performanceA.eloRating,
+      performanceB.eloRating,
     );
-    return;
-  }
+    const expectedB = expectedScore(
+      performanceB.eloRating,
+      performanceA.eloRating,
+    );
 
-  const performanceA = await getPerformance(performanceIdA);
-  const performanceB = await getPerformance(performanceIdB);
-  const winner = await getPerformance(winnerId);
-
-  if (performanceA.songId !== performanceB.songId) {
-    throw new Error("Performances must be for the same song");
-  }
-
-  const scoreA = performanceA.id === winner.id ? 1 : 0;
-  const scoreB = performanceB.id === winner.id ? 1 : 0;
-
-  const kFactor = 32;
-
-  const expectedA =
-    1 /
-    (1 + Math.pow(10, (performanceB.eloRating - performanceA.eloRating) / 400));
-  const expectedB =
-    1 /
-    (1 + Math.pow(10, (performanceA.eloRating - performanceB.eloRating) / 400));
-
-  const newRatingA = performanceA.eloRating + kFactor * (scoreA - expectedA);
-  const newRatingB = performanceB.eloRating + kFactor * (scoreB - expectedB);
-
-  await db.transaction(async (tx) => {
     await tx
       .update(performances)
       .set({
-        eloRating: newRatingA,
+        eloRating: performanceA.eloRating + K_FACTOR * (scoreA - expectedA),
       })
       .where(eq(performances.id, performanceA.id));
     await tx
       .update(performances)
       .set({
-        eloRating: newRatingB,
+        eloRating: performanceB.eloRating + K_FACTOR * (scoreB - expectedB),
       })
       .where(eq(performances.id, performanceB.id));
     await tx.insert(votes).values({
       performance1Id: performanceA.id,
       performance2Id: performanceB.id,
-      winnerId: winner.id,
+      winnerId,
       voterId: userId,
     });
+
+    return true;
   });
+
+  if (!didVote) {
+    return;
+  }
 
   // Invalidate all cached vote and ranking data. `updateTag` (rather than
   // `revalidateTag`) expires the caches immediately, so the voter sees their
@@ -112,7 +140,12 @@ export async function vote(
   updateTag("votes");
   updateTag("performances");
 
-  const performanceTitle = getPerformanceTitle(performanceA.song, winner.show);
-
-  console.log(`New vote: User ${userId} voted for ${performanceTitle}!`);
+  const winner = await db.query.performances.findFirst({
+    where: eq(performances.id, winnerId),
+    with: { song: true, show: true },
+  });
+  if (winner) {
+    const performanceTitle = getPerformanceTitle(winner.song, winner.show);
+    console.log(`New vote: User ${userId} voted for ${performanceTitle}!`);
+  }
 }

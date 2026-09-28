@@ -13,6 +13,7 @@ import { db } from "../drizzle/db";
 import { shows, showVideos } from "../drizzle/schema";
 import { logUpdate } from "../lib/activityLogger";
 import { sendEditNotification } from "../lib/emailNotification";
+import { parseShowVideos } from "../lib/showVideos";
 import { getShowPath } from "../utils";
 
 const editShowSchema = zfd.formData({
@@ -64,18 +65,11 @@ export async function editShow(
     };
   }
 
-  // Parse videos JSON
-  let videos: Array<{ youtubeVideoId: string; title: string }> = [];
-  if (videosJson) {
-    try {
-      videos = JSON.parse(videosJson) as Array<{
-        youtubeVideoId: string;
-        title: string;
-      }>;
-    } catch (error) {
-      console.error("Failed to parse videos JSON:", error);
-    }
+  const parsedVideos = parseShowVideos(videosJson);
+  if ("errorMessage" in parsedVideos) {
+    return { errorMessage: parsedVideos.errorMessage, formData };
   }
+  const { videos } = parsedVideos;
 
   const updatedShow = await db.transaction(async (tx) => {
     const [show] = await tx
