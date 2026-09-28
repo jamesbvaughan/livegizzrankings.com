@@ -1,8 +1,29 @@
 import { auth } from "@clerk/nextjs/server";
 import * as Sentry from "@sentry/nextjs";
+import { headers } from "next/headers";
 import { forbidden, unauthorized } from "next/navigation";
 
-export async function authWithSentry() {
+/**
+ * The header `clerkMiddleware()` sets on every request it handles. It's how
+ * Clerk's own `auth()` detects that the middleware ran.
+ */
+const CLERK_AUTH_STATUS_HEADER = "x-clerk-auth-status";
+
+type AuthSession = Pick<
+  Awaited<ReturnType<typeof auth>>,
+  "userId" | "sessionClaims"
+>;
+
+export async function authWithSentry(): Promise<AuthSession> {
+  // The proxy skips requests for static-file-like paths (see `src/proxy.ts`).
+  // Requests for nonexistent ones, like bots probing for `/wp-admin/x.gif`,
+  // still render the not-found page, and calling `auth()` there throws. Treat
+  // those requests as signed out instead.
+  const requestHeaders = await headers();
+  if (!requestHeaders.has(CLERK_AUTH_STATUS_HEADER)) {
+    return { userId: null, sessionClaims: null };
+  }
+
   const session = await auth();
 
   Sentry.setUser({
