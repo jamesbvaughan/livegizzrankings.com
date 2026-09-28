@@ -43,6 +43,9 @@ export function RandomNotFoundMessage() {
   const [message, setMessage] = useState<ReactNode>(null);
 
   useEffect(() => {
+    // The random pick has to happen after hydration (see above), so setting
+    // state in an effect is intentional here.
+    // eslint-disable-next-line react/set-state-in-effect
     setMessage(
       notFoundMessages[Math.floor(Math.random() * notFoundMessages.length)],
     );

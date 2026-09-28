@@ -3,7 +3,9 @@
 import { SignInButton, SignOutButton, useClerk, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+
+import { useIsClient } from "@/lib/useIsClient";
 
 export function AccountButtons({
   unreviewedLogCountSlot,
@@ -12,11 +14,7 @@ export function AccountButtons({
 }) {
   const clerk = useClerk();
   const { isSignedIn, isLoaded, user } = useUser();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useIsClient();
 
   const openUserProfile = useCallback(() => {
     clerk.openUserProfile();

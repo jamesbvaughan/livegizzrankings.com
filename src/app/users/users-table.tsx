@@ -1,10 +1,13 @@
 "use client";
 
 import {
+  createSortedRowModel,
   flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
+  useTable,
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
@@ -21,7 +24,13 @@ interface UserData {
   edits: number;
 }
 
-const columns: ColumnDef<UserData>[] = [
+const features = tableFeatures({
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+});
+
+const columns: ColumnDef<typeof features, UserData>[] = [
   {
     accessorKey: "username",
     header: "User",
@@ -36,7 +45,7 @@ const columns: ColumnDef<UserData>[] = [
     id: "leftRight",
     header: "L:R",
     accessorFn: (row) => `${row.leftVotes}:${row.rightVotes}`,
-    sortingFn: (rowA, rowB) => {
+    sortFn: (rowA, rowB) => {
       const ratioA =
         rowA.original.leftVotes /
         (rowA.original.leftVotes + rowA.original.rightVotes);
@@ -63,15 +72,14 @@ export default function UsersTable({ data }: { data: UserData[] }) {
     { id: "votes", desc: true },
   ]);
 
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data,
     columns,
     state: {
       sorting,
     },
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -120,7 +128,7 @@ export default function UsersTable({ data }: { data: UserData[] }) {
         <tbody>
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
+              {row.getAllCells().map((cell) => (
                 <td
                   key={cell.id}
                   className={clsx(

@@ -1,7 +1,7 @@
 import bundleAnalyzer from "@next/bundle-analyzer";
 import createMDX from "@next/mdx";
-import type { SentryBuildOptions } from "@sentry/nextjs";
-import { withSentryConfig } from "@sentry/nextjs";
+import type { SentryBuildOptions } from "@sentry/nextjs/config";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -71,12 +71,12 @@ const sentryConfig: SentryBuildOptions = {
   // side errors will fail.
   tunnelRoute: "/monitoring",
 
-  webpack: {
-    // Automatically annotate React components to show their full name in breadcrumbs and session replay
-    reactComponentAnnotation: {
-      enabled: true,
-    },
+  // Automatically annotate React components to show their full name in breadcrumbs and session replay
+  reactComponentAnnotation: {
+    enabled: true,
+  },
 
+  webpack: {
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     treeshake: {
       removeDebugLogging: true,

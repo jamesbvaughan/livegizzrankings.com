@@ -66,20 +66,23 @@ async function GizzTapesNote({ show }: { show: Show }) {
 
   const gizzTapesShowId = show.date;
 
-  let note;
+  let note: string | null;
   try {
     const response = await fetch(
       `https://tapes.kglw.net/api/v1/shows/${gizzTapesShowId}.json`,
     );
-    if (response.status === 404) {
-      return <div>No Gizz Tapes notes for this show.</div>;
-    }
-    const data = (await response.json()) as { notes: string };
-    note = data.notes;
+    note =
+      response.status === 404
+        ? null
+        : ((await response.json()) as { notes: string }).notes;
   } catch (error) {
     const showTitle = getShowTitle(show);
     console.error(`Unable to fetch Gizz Tapes notes for ${showTitle}:`, error);
     return <div>Error fetching Gizz Tapes notes for this show.</div>;
+  }
+
+  if (note === null) {
+    return <div>No Gizz Tapes notes for this show.</div>;
   }
 
   const htmlWithLineBreaks = note.replaceAll("\\n", "<br>");
