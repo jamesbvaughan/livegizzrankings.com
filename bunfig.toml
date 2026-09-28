@@ -1,0 +1,4 @@
+[install]
+# Don't install package versions published less than 24 hours ago, to reduce
+# exposure to compromised releases that get caught and yanked quickly.
+minimumReleaseAge = 86400 # seconds
