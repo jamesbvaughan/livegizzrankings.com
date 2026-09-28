@@ -2,10 +2,10 @@ import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
-import Link from "next/link";
 
 import { AdminOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
+import { Link } from "@/components/Link";
 import { SongRow } from "@/components/SongRow";
 import {
   PageContent,

@@ -1,8 +1,8 @@
 import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
-import Link from "next/link";
 
+import { Link } from "@/components/Link";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
 import type { Show, Song, Vote } from "@/drizzle/schema";

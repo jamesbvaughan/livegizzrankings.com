@@ -1,10 +1,10 @@
 import { count, desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
-import Link from "next/link";
 import pluralize from "pluralize";
 import { Suspense } from "react";
 
+import { Link } from "@/components/Link";
 import { db } from "@/drizzle/db";
 import type { Song } from "@/drizzle/schema";
 import { performances, votes } from "@/drizzle/schema";

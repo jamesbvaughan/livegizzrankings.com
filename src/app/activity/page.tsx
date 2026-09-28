@@ -2,10 +2,10 @@ import { formatDistanceToNow } from "date-fns";
 import { diffLines, type Change } from "diff";
 import { desc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { ensureAdmin } from "@/auth/utils";
+import { Link } from "@/components/Link";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";

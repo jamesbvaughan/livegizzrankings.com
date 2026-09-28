@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
-import Link from "next/link";
 
+import { Link } from "@/components/Link";
 import { db } from "@/drizzle/db";
 import { albums, shows, performances } from "@/drizzle/schema";
 import { getShowTitle } from "@/utils";

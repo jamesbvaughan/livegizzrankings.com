@@ -1,9 +1,9 @@
 import { evaluate } from "@mdx-js/mdx";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import * as runtime from "react/jsx-runtime";
 
+import { Link } from "@/components/Link";
 import {
   PageContent,
   PageSubtitle,

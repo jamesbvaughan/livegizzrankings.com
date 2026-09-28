@@ -1,10 +1,10 @@
 import { formatDistanceToNow } from "date-fns";
 import { desc, and, eq } from "drizzle-orm";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { isAdmin } from "@/auth/utils";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
+import { Link } from "@/components/Link";
 import { PageContent, PageTitle } from "@/components/ui";
 import { getPerformancePath } from "@/dbUtils";
 import { db } from "@/drizzle/db";

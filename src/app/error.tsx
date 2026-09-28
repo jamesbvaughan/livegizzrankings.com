@@ -1,8 +1,9 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import Link from "next/link";
 import { useEffect } from "react";
+
+import { Link } from "@/components/Link";
 
 export default function ErrorPage({
   error,

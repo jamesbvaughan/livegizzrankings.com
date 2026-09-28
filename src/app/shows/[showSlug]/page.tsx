@@ -2,7 +2,6 @@ import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
-import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Suspense } from "react";
 import sanitizeHtml from "sanitize-html";
@@ -10,6 +9,7 @@ import sanitizeHtml from "sanitize-html";
 import { AdminOnly, SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
 import { EloScore } from "@/components/EloScore";
+import { Link } from "@/components/Link";
 import { YouTubePlayer } from "@/components/MediaPlayers";
 import {
   PageContent,

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { SignedInOnly } from "@/components/authGates";
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
+import { Link } from "@/components/Link";
 import { MediaPlayers } from "@/components/MediaPlayers";
 import {
   PageContent,

@@ -43,6 +43,18 @@
     ],
     "jsdoc/require-param": "off",
     "jsdoc/require-returns": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "next/link",
+            "importNames": ["default"],
+            "message": "Use `Link` from `@/components/Link`, which shows a progress bar while navigation is pending."
+          }
+        ]
+      }
+    ],
     // Rules that aren't automatically included in any category I've enabled but
     // that I want.
     "curly": "error",

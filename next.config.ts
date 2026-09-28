@@ -137,6 +137,9 @@ const connectSources = [
 
   // Cloudflare Analytics
   "https://cloudflareinsights.com",
+
+  // Clerk telemetry
+  "https://clerk-telemetry.com",
 ];
 
 const frameSources = [

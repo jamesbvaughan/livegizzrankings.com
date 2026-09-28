@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useActionState, useCallback, useState } from "react";
 
+import { Link } from "@/components/Link";
 import type { Album, Performance, Show, Song } from "@/drizzle/schema";
 import type { ActionState } from "@/lib/actionState";
 import {

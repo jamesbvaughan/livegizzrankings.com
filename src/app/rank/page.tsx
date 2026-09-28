@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
+import { Link } from "@/components/Link";
 import { MediaPlayers } from "@/components/MediaPlayers";
 import { getPerformanceById, getSongBySlug } from "@/dbUtils";
 import { getPerformancePathBySongAndShow, getShowTitle } from "@/utils";

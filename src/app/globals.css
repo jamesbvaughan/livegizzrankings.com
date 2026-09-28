@@ -12,6 +12,21 @@
   --color-muted-2: #44403c;
   --color-muted-3: #1c1917;
   --color-red: #ff0000;
+
+  /* The navigation progress bar (see `LinkPendingIndicator`). It waits 150ms
+     before appearing, then eases toward the right edge without ever reaching
+     it, since the actual progress isn't known. */
+  --animate-link-pending: link-pending 10s cubic-bezier(0.1, 0.8, 0.2, 1) 150ms
+    both;
+
+  @keyframes link-pending {
+    from {
+      width: 0;
+    }
+    to {
+      width: 90%;
+    }
+  }
 }
 
 @layer components {

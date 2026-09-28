@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { BoxedButtonLink } from "@/components/BoxedButtonLink";
+import { Link } from "@/components/Link";
 
 import lgrHandwritten from "./lgr-handwritten.png";
 

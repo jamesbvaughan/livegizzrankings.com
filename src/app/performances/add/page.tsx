@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { addPerformance } from "@/actions/addPerformance";
 import { ensureSignedIn } from "@/auth/utils";
+import { Link } from "@/components/Link";
 import PerformanceForm from "@/components/PerformanceForm";
 import { PageContent, PageTitle } from "@/components/ui";
 import { db } from "@/drizzle/db";

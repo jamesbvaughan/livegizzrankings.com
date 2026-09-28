@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import { Link } from "@/components/Link";
 import { PageContent, PageTitle } from "@/components/ui";
 
 import { NominationForm } from "../NominationForm";

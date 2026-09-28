@@ -1,9 +1,9 @@
 import { and, count, eq, isNull } from "drizzle-orm";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { authWithSentry } from "@/auth/utils";
 import { AdminOnly } from "@/components/authGates";
+import { Link } from "@/components/Link";
 import { db } from "@/drizzle/db";
 import { activityLogs, activityLogReviews } from "@/drizzle/schema";
 

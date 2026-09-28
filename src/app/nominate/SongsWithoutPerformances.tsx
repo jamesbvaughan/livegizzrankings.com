@@ -1,8 +1,8 @@
 import { count, eq, lte } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
-import Link from "next/link";
 
+import { Link } from "@/components/Link";
 import { db } from "@/drizzle/db";
 import type { Album } from "@/drizzle/schema";
 import { performances, songs } from "@/drizzle/schema";

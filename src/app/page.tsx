@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { Suspense } from "react";
+
+import { Link } from "@/components/Link";
 
 import { RecentShows } from "./RecentShows";
 import { RecentVotes } from "./RecentVotes";
