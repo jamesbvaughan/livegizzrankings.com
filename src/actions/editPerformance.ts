@@ -15,6 +15,7 @@ import { db } from "../drizzle/db";
 import { performances } from "../drizzle/schema";
 import { logUpdate } from "../lib/activityLogger";
 import { sendEditNotification } from "../lib/emailNotification";
+import { findStreamingSourceConflict } from "../lib/performanceConflicts";
 
 const editPerformanceSchema = zfd.formData({
   performanceId: zfd.text(),
@@ -74,6 +75,16 @@ export async function editPerformance(
       errorMessage: "A performance for this song and show already exists.",
       formData,
     };
+  }
+
+  const streamingSourceConflict = await findStreamingSourceConflict({
+    bandcampTrackId,
+    youtubeVideoId,
+    youtubeVideoStartTime,
+    excludePerformanceId: performanceId,
+  });
+  if (streamingSourceConflict) {
+    return { errorMessage: streamingSourceConflict, formData };
   }
 
   const updatedPerformance = await db.transaction(async (tx) => {
